@@ -59,6 +59,12 @@ void HeadlessFrontend::update(std::shared_ptr<UpdateParameters> updateParameters
     asyncInvalidate.send();
 }
 
+std::vector<std::reference_wrapper<Tile>> HeadlessFrontend::findOrCreateTiles(std::shared_ptr<UpdateParameters>, const std::string& sourceID) const {
+    if(sourceID.empty()) {
+    }
+    return {};
+}
+
 void HeadlessFrontend::setObserver(RendererObserver& observer_) {
     assert(renderer);
     renderer->setObserver(&observer_);

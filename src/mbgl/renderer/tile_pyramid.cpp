@@ -49,6 +49,128 @@ const Tile* TilePyramid::getRenderedTile(const UnwrappedTileID& tileID) const {
     return it != renderedTiles.end() ? &it->second.get() : nullptr;
 }
 
+const std::vector<std::reference_wrapper<Tile>> TilePyramid::findOrCreateTiles(
+        const std::vector<Immutable<style::LayerProperties>> &layers,
+        const TileParameters &parameters,
+        const style::Source::Impl &sourceImpl, uint16_t tileSize, Range<uint8_t> zoomRange,
+        optional<LatLngBounds> bounds,
+        std::function<std::unique_ptr<Tile>(const OverscaledTileID &)> createTile) {
+
+    const auto type = sourceImpl.type;
+    // Determine the overzooming/underzooming amounts and required tiles.
+    int32_t overscaledZoom = util::coveringZoomLevel(parameters.transformState.getZoom(), type, tileSize);
+    int32_t tileZoom = overscaledZoom;
+    int32_t panZoom = zoomRange.max;
+
+    const optional<uint8_t>& sourcePrefetchZoomDelta = sourceImpl.getPrefetchZoomDelta();
+    const optional<uint8_t>& maxParentTileOverscaleFactor = sourceImpl.getMaxOverscaleFactorForParentTiles();
+    const Duration minimumUpdateInterval = sourceImpl.getMinimumTileUpdateInterval();
+    const bool isVolatile = sourceImpl.isVolatile();
+
+    std::vector<OverscaledTileID> idealTiles;
+    std::vector<OverscaledTileID> panTiles;
+
+    if (overscaledZoom >= zoomRange.min) {
+        int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);
+
+
+        // Make sure we're not reparsing overzoomed raster tiles.
+        if (type == SourceType::Raster) {
+            tileZoom = idealZoom;
+        }
+
+        // Only attempt prefetching in continuous mode.
+        if (parameters.mode == MapMode::Continuous && type != style::SourceType::GeoJSON && type != style::SourceType::Annotations) {
+            // Request lower zoom level tiles (if configured to do so) in an attempt
+            // to show something on the screen faster at the cost of a little of bandwidth.
+            const uint8_t prefetchZoomDelta =
+                    sourcePrefetchZoomDelta ? *sourcePrefetchZoomDelta : parameters.prefetchZoomDelta;
+            if (prefetchZoomDelta) {
+                panZoom = std::max<int32_t>(tileZoom - prefetchZoomDelta, zoomRange.min);
+            }
+
+            if (panZoom < idealZoom) {
+                panTiles = util::tileCover(parameters.transformState, panZoom);
+            }
+        }
+
+        idealTiles = util::tileCover(parameters.transformState, idealZoom, tileZoom);
+        if (parameters.mode == MapMode::Tile && type != SourceType::Raster && type != SourceType::RasterDEM &&
+            idealTiles.size() > 1) {
+            mbgl::Log::Warning(mbgl::Event::General,
+                               "Provided camera options returned %zu tiles, only %s is taken in Tile mode.",
+                               idealTiles.size(),
+                               util::toString(idealTiles[0]).c_str());
+            idealTiles = {idealTiles[0]};
+        }
+    }
+
+    // Stores a list of all the tiles that we're definitely going to retain. There are two
+    // kinds of tiles we need: the ideal tiles determined by the tile cover. They may not yet be in
+    // use because they're still loading. In addition to that, we also need to retain all tiles that
+    // we're actively using, e.g. as a replacement for tile that aren't loaded yet.
+
+    auto retainTileFn = [&](Tile &tile, TileNecessity necessity) -> void {
+        tile.setUpdateParameters({minimumUpdateInterval, isVolatile});
+        tile.setNecessity(necessity);
+    };
+    auto getTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
+        auto it = tiles.find(tileID);
+        return it == tiles.end() ? nullptr : it->second.get();
+    };
+
+    // The min and max zoom for TileRange are based on the updateRenderables algorithm.
+    // Tiles are created at the ideal tile zoom or at lower zoom levels. Child
+    // tiles are used from the cache, but not created.
+    optional<util::TileRange> tileRange = {};
+    if (bounds) {
+        tileRange = util::TileRange::fromLatLngBounds(
+                *bounds, zoomRange.min, std::min(tileZoom, static_cast<int32_t>(zoomRange.max)));
+    }
+    auto createTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
+        if (tileRange && !tileRange->contains(tileID.canonical)) {
+            return nullptr;
+        }
+        std::unique_ptr<Tile> tile = cache.pop(tileID);
+        if (!tile) {
+            tile = createTile(tileID);
+            if (!tile) return nullptr;
+            tile->setObserver(observer);
+            if(!layers.empty()) {
+                tile->setLayers(layers);
+            }
+        }
+
+        return tiles.emplace(tileID, std::move(tile)).first->second.get();
+    };
+
+    std::vector<std::reference_wrapper<Tile>> renderTiles;
+    auto renderTileFn = [&](const UnwrappedTileID& tileID, Tile& tile) {
+        if (tileRange && !tileRange->contains(tileID.canonical)) {
+        }
+
+        //把renderTile记录下来
+        renderTiles.emplace_back(tile);
+    };
+
+
+    if (!panTiles.empty()) {
+        algorithm::updateRenderables(
+                getTileFn,
+                createTileFn,
+                retainTileFn,
+                [](const UnwrappedTileID&, Tile&) {},
+                panTiles,
+                zoomRange,
+                maxParentTileOverscaleFactor);
+    }
+
+    algorithm::updateRenderables(
+            getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, zoomRange, maxParentTileOverscaleFactor);
+
+    return renderTiles;
+}
+
 void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& layers,
                          const bool needsRendering,
                          const bool needsRelayout,

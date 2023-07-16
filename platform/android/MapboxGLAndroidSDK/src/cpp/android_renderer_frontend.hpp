@@ -53,6 +53,7 @@ public:
                            const std::string& extension,
                            const std::string& extensionField,
                            const optional<std::map<std::string, mbgl::Value>>& args) const;
+    std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(std::shared_ptr<UpdateParameters>, const std::string& sourceID) const override;
 
     // Memory
     void reduceMemoryUse();

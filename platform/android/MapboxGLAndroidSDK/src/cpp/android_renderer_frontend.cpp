@@ -138,6 +138,10 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(const std:
     return mapRenderer.actor().ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args).get();
 }
 
+std::vector<std::reference_wrapper<Tile>> AndroidRendererFrontend::findOrCreateTiles(std::shared_ptr<UpdateParameters> updateParameters, const std::string& sourceID) const {
+    return mapRenderer.actor().ask(&Renderer::findOrCreateTile, sourceID, updateParameters).get();
+}
+
 } // namespace android
 } // namespace mbgl
 
