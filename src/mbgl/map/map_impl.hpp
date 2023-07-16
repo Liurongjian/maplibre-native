@@ -12,6 +12,7 @@
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/size.hpp>
+#include <mbgl/tile/tile.hpp>
 
 namespace mbgl {
 
@@ -47,6 +48,7 @@ public:
     void onDidFinishRenderingMap() final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
+    std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(const FreeCameraOptions& camera, const std::string& sourceID);
 
     // Map
     void jumpTo(const CameraOptions&);

@@ -34,4 +34,18 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                        });
 }
 
+std::vector<std::reference_wrapper<Tile>> RenderVectorSource::findOrCreateTile(Immutable<style::Source::Impl> impl,
+                                         const std::vector<Immutable<style::LayerProperties>> &layers,
+                                         const TileParameters &parameters) {
+    auto tileset = getTileset();
+    return tilePyramid.findOrCreateTiles(layers, parameters, *impl, util::tileSize_I,
+                                         tileset->zoomRange, tileset->bounds,
+                                         [&](const OverscaledTileID &tileID) {
+                                             return std::make_unique<VectorTile>(tileID,
+                                                                                 baseImpl->id,
+                                                                                 parameters,
+                                                                                 *tileset);
+                                         });
+}
+
 } // namespace mbgl

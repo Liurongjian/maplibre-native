@@ -36,6 +36,7 @@ public:
 
     void reset() override;
     void update(std::shared_ptr<UpdateParameters>) override;
+    std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(std::shared_ptr<UpdateParameters>, const std::string& sourceID) const override;
     void setObserver(RendererObserver&) override;
 
     double getFrameTime() const;

@@ -98,6 +98,10 @@ std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID, 
     return impl->orchestrator.querySourceFeatures(sourceID, options);
 }
 
+std::vector<std::reference_wrapper<Tile>> Renderer::findOrCreateTile(const std::string& sourceID, const std::shared_ptr<UpdateParameters>& updateParameters) const {
+    return impl->orchestrator.findOrCreateSourceTiles(updateParameters, sourceID);
+}
+
 FeatureExtensionValue Renderer::queryFeatureExtensions(const std::string& sourceID,
                                                        const Feature& feature,
                                                        const std::string& extension,

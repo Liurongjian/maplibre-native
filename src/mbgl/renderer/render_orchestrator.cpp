@@ -135,6 +135,21 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
+const std::vector<std::reference_wrapper<Tile>> RenderOrchestrator::findOrCreateSourceTiles(const std::shared_ptr<UpdateParameters>& updateParameters, const std::string& sourceID) {
+    RenderSource* source = getRenderSource(sourceID);
+    if(!source) return {};
+    const TileParameters tileParameters{updateParameters->pixelRatio,
+                                        updateParameters->debugOptions,
+                                        updateParameters->transformState,
+                                        updateParameters->fileSource,
+                                        updateParameters->mode,
+                                        updateParameters->annotationManager,
+                                        *imageManager,
+                                        *glyphManager,
+                                        updateParameters->prefetchZoomDelta};
+    return source->findOrCreateTile(source->baseImpl, {}, tileParameters);
+}
+
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;

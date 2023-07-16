@@ -73,6 +73,11 @@ void RenderSource::onTileError(Tile& tile, std::exception_ptr error) {
 bool RenderSource::isEnabled() const {
     return enabled;
 }
+std::vector<std::reference_wrapper<Tile>> RenderSource::findOrCreateTile(Immutable<style::Source::Impl>,
+                                       const std::vector<Immutable<style::LayerProperties>>&,
+                                       const TileParameters&) {
+    return {};
+}
 
 uint8_t RenderSource::getMaxZoom() const { 
     assert(false);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mbgl/tile/tile.hpp>
 
 namespace mbgl {
 
@@ -26,6 +27,8 @@ public:
 
     // Coalescing updates is up to the implementer
     virtual void update(std::shared_ptr<UpdateParameters>) = 0;
+
+    virtual std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(std::shared_ptr<UpdateParameters>, const std::string& sourceID) const =0 ;
 };
 
 } // namespace mbgl

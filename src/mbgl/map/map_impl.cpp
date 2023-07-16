@@ -4,6 +4,7 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/util/exception.hpp>
+#include <mbgl/tile/tile.hpp>
 
 namespace mbgl {
 
@@ -68,6 +69,31 @@ void Map::Impl::onUpdate() {
                                crossSourceCollisions};
 
     rendererFrontend.update(std::make_shared<UpdateParameters>(std::move(params)));
+}
+
+std::vector<std::reference_wrapper<Tile>> Map::Impl::findOrCreateTiles(const FreeCameraOptions& camera, const std::string& sourceID) {
+
+    std::unique_ptr<Transform> tranCopy = std::make_unique<Transform>(std::move(transform.getState()));
+    tranCopy->setFreeCameraOptions(camera);
+    UpdateParameters params = {style->impl->isLoaded(),
+                               mode,
+                               pixelRatio,
+                               debugOptions,
+                               Clock::now(),
+                               tranCopy->getState(),
+                               style->impl->getGlyphURL(),
+                               style->impl->spriteLoaded,
+                               style->impl->getTransitionOptions(),
+                               style->impl->getLight()->impl,
+                               style->impl->getImageImpls(),
+                               style->impl->getSourceImpls(),
+                               style->impl->getLayerImpls(),
+                               annotationManager.makeWeakPtr(),
+                               fileSource,
+                               prefetchZoomDelta,
+                               bool(stillImageRequest),
+                               crossSourceCollisions};
+    return rendererFrontend.findOrCreateTiles(std::make_shared<UpdateParameters>(std::move(params)), sourceID);
 }
 
 void Map::Impl::onStyleLoading() {
