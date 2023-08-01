@@ -130,8 +130,12 @@ RenderTileSource::queryRenderedFeatures(const ScreenLineString& geometry,
     return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, featureState);
 }
 
-std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOptions& options) const {
-    return tilePyramid.querySourceFeatures(options);
+std::vector<Feature> RenderTileSource::querySourceFeatures(const SourceQueryOptions& options, const OverscaledTileID& id) const {
+    return tilePyramid.querySourceFeatures(options, id);
+}
+Tile* RenderTileSource::getTile(const OverscaledTileID& id) const{
+    auto tile = tilePyramid.getTileInAll(id);
+    return tile == nullptr ? nullptr : tile;
 }
 
 void RenderTileSource::setFeatureState(const optional<std::string>& sourceLayerID, const std::string& featureID,

@@ -1,10 +1,12 @@
 package com.mapbox.mapboxsdk.style.sources;
 
+import android.graphics.Bitmap;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 
+import com.mapbox.mapboxsdk.maps.TileId;
 import java.net.URI;
 import java.net.URL;
 
@@ -171,6 +173,11 @@ public class RasterDemSource extends Source {
     return nativeGetUrl();
   }
 
+  @Nullable
+  public Bitmap queryTileBitmap(TileId tileId) {
+    return nativeQueryTileBitmap(tileId);
+  }
+
   @Keep
   protected native void initialize(String layerId, Object payload, int tileSize);
 
@@ -181,5 +188,9 @@ public class RasterDemSource extends Source {
   @NonNull
   @Keep
   protected native String nativeGetUrl();
+
+  @NonNull
+  @Keep
+  protected native Bitmap nativeQueryTileBitmap(TileId tileId);
 
 }

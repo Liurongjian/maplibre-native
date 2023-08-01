@@ -1,11 +1,27 @@
+def MAPLIBREROOT = getProjectDir().getParent()
+
+buildscript {
+    apply from: "../gradle/dependencies.gradle"
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath dependenciesList.licensesPlugin
+        classpath dependenciesList.kotlinPlugin
+        classpath dependenciesList.gradleNexus
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: "com.jaredsburrows.license"
 apply plugin: 'kotlin-android'
-apply from: "${rootDir}/gradle/native-build.gradle"
-apply plugin: 'com.mapbox.android.sdk.versions'
+apply from: "${MAPLIBREROOT}/gradle/native-build.gradle"
 
 dependencies {
-    lintChecks project(":MapboxGLAndroidSDKLint")
     api dependenciesList.mapboxJavaGeoJSON
     api dependenciesList.mapboxAndroidGestures
     api dependenciesList.mapboxAndroidAccounts
@@ -100,11 +116,11 @@ configurations {
     all*.exclude group: 'commons-collections', module: 'commons-collections'
 }
 
-apply from: "${rootDir}/gradle/gradle-javadoc.gradle"
-apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
-apply from: "${rootDir}/gradle/gradle-dependencies-graph.gradle"
-apply from: "${rootDir}/gradle/gradle-update-vendor-modules.gradle"
-apply from: "${rootDir}/gradle/android-nitpick.gradle"
-apply from: "${rootDir}/gradle/gradle-publish.gradle"
+//apply from: "../gradle/gradle-javadoc.gradle"
+apply from: "../gradle/gradle-checkstyle.gradle"
+apply from: "../gradle/gradle-dependencies-graph.gradle"
+apply from: "../gradle/gradle-update-vendor-modules.gradle"
+apply from: "../gradle/android-nitpick.gradle"
+//apply from: "../gradle/gradle-publish.gradle"
 // Disabled to prevent timeouts
 // apply from: "${rootDir}/gradle/jacoco-report.gradle"

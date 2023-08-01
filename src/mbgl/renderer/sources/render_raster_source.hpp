@@ -20,7 +20,7 @@ private:
                           const mat4& projMatrix) const override;
 
     std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const override;
+    querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const override;
 
     // RenderTileSetSource overrides
     void updateInternal(const Tileset&,

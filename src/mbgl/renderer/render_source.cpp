@@ -78,6 +78,9 @@ std::vector<std::reference_wrapper<Tile>> RenderSource::findOrCreateTile(Immutab
                                        const TileParameters&) {
     return {};
 }
+Tile* RenderSource::getTile(const OverscaledTileID&) const{
+    return nullptr;
+}
 
 uint8_t RenderSource::getMaxZoom() const { 
     assert(false);

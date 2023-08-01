@@ -111,7 +111,7 @@ RenderImageSource::queryRenderedFeatures(const ScreenLineString&,
     return std::unordered_map<std::string, std::vector<Feature>> {};
 }
 
-std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderImageSource::querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID&) const {
     return {};
 }
 

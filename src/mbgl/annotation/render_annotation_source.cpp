@@ -51,7 +51,7 @@ RenderAnnotationSource::queryRenderedFeatures(const ScreenLineString& geometry,
     return tilePyramid.queryRenderedFeatures(geometry, transformState, layers, options, projMatrix, {});
 }
 
-std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderAnnotationSource::querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const {
     return {};
 }
 

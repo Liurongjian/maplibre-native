@@ -26,6 +26,7 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include "mbgl/renderer/sources/render_tile_source.hpp"
 
 namespace mbgl {
 
@@ -601,11 +602,17 @@ std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineS
     return queryRenderedFeatures(geometry, options, shapeAnnotationLayers);
 }
 
-std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options) const {
+std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options, const OverscaledTileID& id) const {
     const RenderSource* source = getRenderSource(sourceID);
     if (!source) return {};
 
-    return source->querySourceFeatures(options);
+    return source->querySourceFeatures(options, id);
+}
+
+Tile* RenderOrchestrator::querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const{
+    const RenderSource* source = getRenderSource(sourceID);
+    if(!source) return nullptr;
+    return source->getTile(id);
 }
 
 FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(const std::string& sourceID,

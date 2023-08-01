@@ -67,7 +67,7 @@ AndroidRendererFrontend::AndroidRendererFrontend(MapRenderer& mapRenderer_)
         : mapRenderer(mapRenderer_)
         , mapRunLoop(util::RunLoop::Get())
         , updateAsyncTask(std::make_unique<util::AsyncTask>([this]() {
-              mapRenderer.update(std::move(updateParams));
+              mapRenderer.update(updateParams);
               mapRenderer.requestRender();
           })) {
 }
@@ -94,10 +94,14 @@ void AndroidRendererFrontend::reduceMemoryUse() {
     mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
 }
 
+std::shared_ptr<UpdateParameters> AndroidRendererFrontend::getBackupParams() {
+    return updateParams;
+}
+
 std::vector<Feature> AndroidRendererFrontend::querySourceFeatures(const std::string& sourceID,
-                                                                  const SourceQueryOptions& options) const {
+                                                                  const SourceQueryOptions& options, const OverscaledTileID& id) const {
     // Waits for the result from the orchestration thread and returns
-    return mapRenderer.actor().ask(&Renderer::querySourceFeatures, sourceID, options).get();
+    return mapRenderer.actor().ask(&Renderer::querySourceFeatures, sourceID, options, id).get();
 }
 
 std::vector<Feature> AndroidRendererFrontend::queryRenderedFeatures(const ScreenBox& box,
@@ -141,6 +145,11 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(const std:
 std::vector<std::reference_wrapper<Tile>> AndroidRendererFrontend::findOrCreateTiles(std::shared_ptr<UpdateParameters> updateParameters, const std::string& sourceID) const {
     return mapRenderer.actor().ask(&Renderer::findOrCreateTile, sourceID, updateParameters).get();
 }
+
+Tile* AndroidRendererFrontend::querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const {
+    return mapRenderer.actor().ask(&Renderer::querySourceTile, sourceID, id).get();
+}
+
 
 } // namespace android
 } // namespace mbgl

@@ -37,7 +37,7 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
     assert(orderedKeys.size() <= size);
 }
 
-Tile* TileCache::get(const OverscaledTileID& key) {
+Tile* TileCache::get(const OverscaledTileID& key) const{
     auto it = tiles.find(key);
     if (it != tiles.end()) {
         return it->second.get();

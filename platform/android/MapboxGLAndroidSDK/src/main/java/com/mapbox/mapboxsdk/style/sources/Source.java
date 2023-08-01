@@ -5,7 +5,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mapbox.mapboxsdk.LibraryLoader;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.TileId;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Base Peer class for sources. see source.hpp for the other half of the peer.
@@ -153,6 +157,11 @@ public abstract class Source {
     return nativeGetMinimumTileUpdateInterval();
   }
 
+  public List<TileId> findFreeCameraTiles(LatLng location, double bearing, double pitch, int width, int height, float fov) {
+    TileId[] tileIds = nativeFindFreeCameraTiles(bearing, pitch, location.getLatitude(), location.getLongitude(), location.getAltitude(), width, height, fov);
+    return Arrays.asList(tileIds);
+  }
+
   /**
    * Internal use
    *
@@ -193,6 +202,10 @@ public abstract class Source {
   @NonNull
   @Keep
   protected native void nativeSetVolatile(Boolean value);
+
+  protected native TileId[] nativeFindFreeCameraTiles(double bearing, double pitch,
+                                                      double latitude, double longitude, double alt,
+                                                      int width, int height, float fov);
 
   @NonNull
   @Keep

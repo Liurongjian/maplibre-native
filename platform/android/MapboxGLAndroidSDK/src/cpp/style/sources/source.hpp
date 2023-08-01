@@ -8,6 +8,7 @@
 #include "../../android_renderer_frontend.hpp"
 
 #include <jni/jni.hpp>
+#include "map/tile_android.hpp"
 
 namespace mbgl {
 namespace android {
@@ -61,6 +62,10 @@ public:
     void setMinimumTileUpdateInterval(JNIEnv&, jni::Long &);
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
+
+    jni::Local<jni::Array<jni::Object<TileId>>> findFreeCameraTiles(JNIEnv& env, jni::jdouble bearing, jni::jdouble pitch,
+                                                                    jni::jdouble latitude, jni::jdouble longitude, jni::jdouble alt,
+                                                                    jni::jint width, jni::jint height, jni::jfloat fov);
 
 protected:
     // Set on newly created sources until added to the map.

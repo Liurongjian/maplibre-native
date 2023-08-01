@@ -41,7 +41,7 @@ public:
     // Feature querying
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate&, const RenderedQueryOptions&) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox&, const RenderedQueryOptions&) const;
-    std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&) const;
+    std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&, const OverscaledTileID& id = {0,0,0}) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
 
@@ -54,9 +54,12 @@ public:
                            const std::string& extensionField,
                            const optional<std::map<std::string, mbgl::Value>>& args) const;
     std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(std::shared_ptr<UpdateParameters>, const std::string& sourceID) const override;
+    Tile* querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const;
 
     // Memory
     void reduceMemoryUse();
+
+    std::shared_ptr<UpdateParameters> getBackupParams();
 
 private:
     MapRenderer& mapRenderer;

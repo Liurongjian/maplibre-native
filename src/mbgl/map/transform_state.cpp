@@ -567,6 +567,10 @@ float TransformState::getFieldOfView() const {
     return fov;
 }
 
+void TransformState::setFieldOfView(float camFov) {
+    fov = camFov;
+}
+
 float TransformState::getCameraToCenterDistance() const {
     return 0.5 * size.height / std::tan(fov / 2.0);
 }

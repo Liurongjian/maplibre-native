@@ -173,6 +173,7 @@ public:
     double getBearing() const;
     void setBearing(double);
     float getFieldOfView() const;
+    void setFieldOfView(float);
     float getCameraToCenterDistance() const;
     double getPitch() const;
     void setPitch(double);

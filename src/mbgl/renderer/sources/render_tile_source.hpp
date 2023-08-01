@@ -33,7 +33,8 @@ public:
                           const mat4& projMatrix) const override;
 
     std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const override;
+    querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID&) const override;
+    Tile* getTile(const OverscaledTileID&) const override;
 
     void setFeatureState(const optional<std::string>&, const std::string&, const FeatureState&) override;
 

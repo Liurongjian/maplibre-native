@@ -54,6 +54,7 @@ public:
 
     const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
     Tile* getTile(const OverscaledTileID&);
+    Tile* getTileInAll(const OverscaledTileID&) const;
     const Tile* getRenderedTile(const UnwrappedTileID&) const;
 
     void handleWrapJump(float lng);
@@ -62,9 +63,7 @@ public:
         const ScreenLineString& geometry, const TransformState& transformState,
         const std::unordered_map<std::string, const RenderLayer*>&, const RenderedQueryOptions& options,
         const mat4& projMatrix, const mbgl::SourceFeatureState& featureState) const;
-
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const;
-
+        std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& id) const;
     void setCacheSize(size_t);
     void reduceMemoryUse();
 
@@ -81,6 +80,7 @@ private:
     void addRenderTile(const UnwrappedTileID& tileID, Tile& tile);
 
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
+    std::map<OverscaledTileID, std::unique_ptr<Tile>> freeTiles;
     TileCache cache;
 
     std::map<UnwrappedTileID, std::reference_wrapper<Tile>> renderedTiles; // Sorted by tile id.

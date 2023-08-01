@@ -53,6 +53,21 @@ namespace android {
         }
         return Feature::convert(env, features);
     }
+    jni::Local<jni::Array<jni::Object<geojson::Feature>>> VectorSource::queryTileFeatures(jni::JNIEnv& env, const jni::Object<TileId>& tile, const jni::Array<jni::String>& jSourceLayerIds,
+                                                                                          const jni::Array<jni::Object<>>& jfilter) {
+        using namespace mbgl::android::conversion;
+        using namespace mbgl::android::geojson;
+
+        std::vector<mbgl::Feature> features;
+        if (rendererFrontend) {
+            features = rendererFrontend->querySourceFeatures(source.getID(),
+                                                             { toVector(env, jSourceLayerIds), toFilter(env, jfilter) },
+                                                             {(uint8_t) TileId::getOverscaledZ(env, tile), (int16_t) TileId::getWrap(env, tile),
+                                                              (uint8_t) TileId::getZ(env, tile), (uint32_t) TileId::getX(env, tile),
+                                                              (uint32_t) TileId::getY(env, tile)});
+        }
+        return Feature::convert(env, features);
+    }
 
     jni::Local<jni::Object<Source>> VectorSource::createJavaPeer(jni::JNIEnv& env) {
         static auto& javaClass = jni::Class<VectorSource>::Singleton(env);
@@ -73,6 +88,7 @@ namespace android {
             "initialize",
             "finalize",
             METHOD(&VectorSource::querySourceFeatures, "querySourceFeatures"),
+            METHOD(&VectorSource::queryTileFeatures, "queryTileFeatures"),
             METHOD(&VectorSource::getURL, "nativeGetUrl")
         );
     }

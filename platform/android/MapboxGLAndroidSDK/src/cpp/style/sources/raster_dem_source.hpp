@@ -3,6 +3,8 @@
 #include "source.hpp"
 #include <mbgl/style/sources/raster_dem_source.hpp>
 #include <jni/jni.hpp>
+#include "bitmap.hpp"
+#include "map/tile_android.hpp"
 
 namespace mbgl {
 namespace android {
@@ -19,6 +21,8 @@ public:
     ~RasterDEMSource();
 
     jni::Local<jni::String> getURL(jni::JNIEnv&);
+
+    jni::Local<jni::Object<Bitmap>> queryTileBitmap(jni::JNIEnv& env, jni::Object<TileId>& tile);
 
 private:
     jni::Local<jni::Object<Source>> createJavaPeer(jni::JNIEnv&);

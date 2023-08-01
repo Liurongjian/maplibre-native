@@ -17,6 +17,7 @@ class RendererObserver;
 class RenderedQueryOptions;
 class SourceQueryOptions;
 class UpdateParameters;
+class OverscaledTileID;
 
 namespace gfx {
 class RendererBackend;
@@ -56,8 +57,9 @@ public:
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
-    std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}) const;
+    std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}, const OverscaledTileID& id = {0, 0, 0}) const;
     std::vector<std::reference_wrapper<Tile>> findOrCreateTile(const std::string& sourceID, const std::shared_ptr<UpdateParameters>& updateParameters) const;
+    Tile* querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;
     AnnotationIDs getAnnotationIDs(const std::vector<Feature>&) const;

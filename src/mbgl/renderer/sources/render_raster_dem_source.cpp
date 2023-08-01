@@ -107,6 +107,20 @@ void RenderRasterDEMSource::onTileChanged(Tile& tile){
     RenderTileSource::onTileChanged(tile);
 }
 
+std::vector<std::reference_wrapper<Tile>> RenderRasterDEMSource::findOrCreateTile(Immutable<style::Source::Impl> impl,
+                                                                                   const std::vector<Immutable<style::LayerProperties>> &layers,
+                                                                                   const TileParameters &parameters) {
+    auto tileset = getTileset();
+    if(tileset == nullopt) {
+        return {};
+    }
+    return tilePyramid.findOrCreateTiles(layers, parameters, *impl, util::tileSize,
+                                         tileset->zoomRange, tileset->bounds,
+                                         [&](const OverscaledTileID &tileID) {
+                                             return std::make_unique<RasterDEMTile>(tileID, parameters, *tileset);
+                                         });
+}
+
 std::unordered_map<std::string, std::vector<Feature>>
 RenderRasterDEMSource::queryRenderedFeatures(const ScreenLineString&,
                                           const TransformState&,
@@ -116,7 +130,7 @@ RenderRasterDEMSource::queryRenderedFeatures(const ScreenLineString&,
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
-std::vector<Feature> RenderRasterDEMSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderRasterDEMSource::querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const {
     return {};
 }
 

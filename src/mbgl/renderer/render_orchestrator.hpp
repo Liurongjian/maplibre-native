@@ -54,7 +54,8 @@ public:
     const std::vector<std::reference_wrapper<Tile>> findOrCreateSourceTiles(const std::shared_ptr<UpdateParameters>&, const std::string& sourceID);
 
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions&) const;
-    std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&) const;
+    std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&, const OverscaledTileID& id) const;
+    Tile* querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const;
     std::vector<Feature> queryShapeAnnotations(const ScreenLineString&) const;
 
     FeatureExtensionValue queryFeatureExtensions(const std::string& sourceID,

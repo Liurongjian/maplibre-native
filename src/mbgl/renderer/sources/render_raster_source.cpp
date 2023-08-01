@@ -51,7 +51,7 @@ RenderRasterSource::queryRenderedFeatures(const ScreenLineString&,
     return std::unordered_map<std::string, std::vector<Feature>>{};
 }
 
-std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&) const {
+std::vector<Feature> RenderRasterSource::querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const {
     return {};
 }
 

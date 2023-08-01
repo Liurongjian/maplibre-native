@@ -1,4 +1,6 @@
-apply from: "${rootDir}/gradle/dependencies.gradle"
+def MAPLIBREROOT = getProjectDir().getParent()
+
+apply from: "${MAPLIBREROOT}/gradle/dependencies.gradle"
 
 def MAPBOX_JAVA_DIR = 'maplibre-java'
 def MAPBOX_JAVA_TAG_PREFIX = 'v'
@@ -23,13 +25,13 @@ task androidNitpick {
 private def verifyVendorSubmodulePin(def dir, def prefix, def version) {
     println "Verify vendor submodule pin: ${dir} (${prefix + version})"
     exec {
-        workingDir = "${rootDir}/vendor/${dir}"
+        workingDir = "${MAPLIBREROOT}/vendor/${dir}"
         commandLine "git", "fetch", "-t"
     }
 
     def output = new ByteArrayOutputStream()
     exec {
-        workingDir = "${rootDir}/vendor/${dir}"
+        workingDir = "${MAPLIBREROOT}/vendor/${dir}"
         commandLine "git", "rev-list", "-n", "1", "tags/${prefix + version}"
         standardOutput = output
     }
@@ -37,7 +39,7 @@ private def verifyVendorSubmodulePin(def dir, def prefix, def version) {
     output.reset()
 
     exec {
-        workingDir = "${rootDir}/vendor/${dir}"
+        workingDir = "${MAPLIBREROOT}/vendor/${dir}"
         commandLine "git", "rev-parse", "HEAD"
         standardOutput = output
     }
@@ -56,7 +58,7 @@ private def verifyVendorSubmodulePin(def dir, def prefix, def version) {
 private def verifyLicenseGeneration() {
     println "Verify license generation with git diff..."
     exec {
-        workingDir = "${rootDir}"
+        workingDir = "${MAPLIBREROOT}"
         commandLine "python", "scripts/validate-license.py"
     }
 }

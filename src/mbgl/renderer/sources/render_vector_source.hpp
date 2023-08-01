@@ -11,7 +11,7 @@ public:
     explicit RenderVectorSource(Immutable<style::VectorSource::Impl>);
     std::vector<std::reference_wrapper<Tile>> findOrCreateTile(Immutable<style::Source::Impl>,
                                              const std::vector<Immutable<style::LayerProperties>>&,
-                                             const TileParameters&);
+                                             const TileParameters&) override;
 private:
     void updateInternal(const Tileset&,
                         const std::vector<Immutable<style::LayerProperties>>&,

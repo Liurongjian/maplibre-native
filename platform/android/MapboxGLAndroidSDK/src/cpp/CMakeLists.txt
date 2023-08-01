@@ -99,6 +99,8 @@ add_library(mapbox-gl SHARED
             ${PROJECT_SOURCE_DIR}/map/camera_position.hpp
             ${PROJECT_SOURCE_DIR}/map/image.cpp
             ${PROJECT_SOURCE_DIR}/map/image.hpp
+            ${PROJECT_SOURCE_DIR}/map/tile_android.cpp
+            ${PROJECT_SOURCE_DIR}/map/tile_android.hpp
             ${PROJECT_SOURCE_DIR}/map_renderer.cpp
             ${PROJECT_SOURCE_DIR}/map_renderer.hpp
             ${PROJECT_SOURCE_DIR}/map_renderer_runnable.cpp

@@ -94,12 +94,16 @@ AnnotationIDs Renderer::getAnnotationIDs(const std::vector<Feature>& features) c
     return ids;
 }
 
-std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options) const {
-    return impl->orchestrator.querySourceFeatures(sourceID, options);
+std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options, const OverscaledTileID& id) const {
+    return impl->orchestrator.querySourceFeatures(sourceID, options, id);
 }
 
 std::vector<std::reference_wrapper<Tile>> Renderer::findOrCreateTile(const std::string& sourceID, const std::shared_ptr<UpdateParameters>& updateParameters) const {
     return impl->orchestrator.findOrCreateSourceTiles(updateParameters, sourceID);
+}
+
+Tile* Renderer::querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const {
+    return impl->orchestrator.querySourceTile(sourceID, id);
 }
 
 FeatureExtensionValue Renderer::queryFeatureExtensions(const std::string& sourceID,

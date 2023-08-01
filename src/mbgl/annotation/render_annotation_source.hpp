@@ -23,7 +23,7 @@ public:
                           const mat4& projMatrix) const final;
 
     std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const final;
+    querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID&) const final;
 
 private:
     const AnnotationSource::Impl& impl() const;

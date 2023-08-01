@@ -5,6 +5,7 @@
 #include <mbgl/util/optional.hpp>
 #include <mbgl/util/unitbezier.hpp>
 #include <mbgl/util/vectors.hpp>
+#include <mbgl/util/size.hpp>
 
 #include <functional>
 
@@ -121,6 +122,16 @@ struct FreeCameraOptions {
          - Pitch has an upper limit */
     optional<vec4> orientation = nullopt;
 
+    /**
+     * 更新相机FOV
+     */
+    optional<float> fov = nullopt;
+
+    /**
+     * 更新显示大小
+     */
+    optional<Size> size = nullopt;
+
     /** Helper function for setting the mercator position as Lat&Lng and altitude in meters */
     void setLocation(const LatLngAltitude& location);
 
@@ -136,6 +147,9 @@ struct FreeCameraOptions {
     /** Helper function for setting the orientation of the camera as a pitch and a bearing.
         Both values are in degrees */
     void setPitchBearing(double pitch, double bearing);
+
+    void setFov(float fov);
+    void setSize(float width, float height);
 };
 
 } // namespace mbgl

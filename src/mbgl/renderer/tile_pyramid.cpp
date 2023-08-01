@@ -44,6 +44,18 @@ Tile* TilePyramid::getTile(const OverscaledTileID& tileID) {
     return it == tiles.end() ? cache.get(tileID) : it->second.get();
 }
 
+Tile* TilePyramid::getTileInAll(const OverscaledTileID& tileID) const{
+    auto it = tiles.find(tileID);
+    if(it != tiles.end()) {
+        return it->second.get();
+    }
+    it = freeTiles.find(tileID);
+    if(it != freeTiles.end()) {
+        return it->second.get();
+    }
+    return cache.get(tileID);
+}
+
 const Tile* TilePyramid::getRenderedTile(const UnwrappedTileID& tileID) const {
     auto it = renderedTiles.find(tileID);
     return it != renderedTiles.end() ? &it->second.get() : nullptr;
@@ -63,7 +75,6 @@ const std::vector<std::reference_wrapper<Tile>> TilePyramid::findOrCreateTiles(
     int32_t panZoom = zoomRange.max;
 
     const optional<uint8_t>& sourcePrefetchZoomDelta = sourceImpl.getPrefetchZoomDelta();
-    const optional<uint8_t>& maxParentTileOverscaleFactor = sourceImpl.getMaxOverscaleFactorForParentTiles();
     const Duration minimumUpdateInterval = sourceImpl.getMinimumTileUpdateInterval();
     const bool isVolatile = sourceImpl.isVolatile();
 
@@ -109,14 +120,23 @@ const std::vector<std::reference_wrapper<Tile>> TilePyramid::findOrCreateTiles(
     // kinds of tiles we need: the ideal tiles determined by the tile cover. They may not yet be in
     // use because they're still loading. In addition to that, we also need to retain all tiles that
     // we're actively using, e.g. as a replacement for tile that aren't loaded yet.
+    std::vector<std::reference_wrapper<Tile>> renderTiles;
+    std::set<OverscaledTileID> retain;
 
-    auto retainTileFn = [&](Tile &tile, TileNecessity necessity) -> void {
+    auto requestTileData = [&](Tile &tile, TileNecessity necessity) -> void {
         tile.setUpdateParameters({minimumUpdateInterval, isVolatile});
         tile.setNecessity(necessity);
+        retain.emplace(tile.id);
+        renderTiles.emplace_back(tile);
     };
     auto getTileFn = [&](const OverscaledTileID& tileID) -> Tile* {
         auto it = tiles.find(tileID);
-        return it == tiles.end() ? nullptr : it->second.get();
+        auto tile = it == tiles.end() ? nullptr : it->second.get();
+        if(tile == nullptr) {
+            it = freeTiles.find(tileID);
+            tile = it == freeTiles.end() ? nullptr : it->second.get();
+        }
+        return tile;
     };
 
     // The min and max zoom for TileRange are based on the updateRenderables algorithm.
@@ -136,37 +156,48 @@ const std::vector<std::reference_wrapper<Tile>> TilePyramid::findOrCreateTiles(
             tile = createTile(tileID);
             if (!tile) return nullptr;
             tile->setObserver(observer);
-            if(!layers.empty()) {
-                tile->setLayers(layers);
-            }
+            tile->setLayers(layers);
         }
 
-        return tiles.emplace(tileID, std::move(tile)).first->second.get();
+        return freeTiles.emplace(tileID, std::move(tile)).first->second.get();
     };
 
-    std::vector<std::reference_wrapper<Tile>> renderTiles;
-    auto renderTileFn = [&](const UnwrappedTileID& tileID, Tile& tile) {
-        if (tileRange && !tileRange->contains(tileID.canonical)) {
-        }
-
-        //把renderTile记录下来
-        renderTiles.emplace_back(tile);
-    };
-
-
-    if (!panTiles.empty()) {
-        algorithm::updateRenderables(
-                getTileFn,
-                createTileFn,
-                retainTileFn,
-                [](const UnwrappedTileID&, Tile&) {},
-                panTiles,
-                zoomRange,
-                maxParentTileOverscaleFactor);
+    std::vector<OverscaledTileID> ids;
+    for(const auto& idealDataTileID : panTiles) {
+        ids.push_back(idealDataTileID);
+    }
+    for(const auto& idealDataTileID : idealTiles) {
+        ids.push_back(idealDataTileID);
     }
 
-    algorithm::updateRenderables(
-            getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, zoomRange, maxParentTileOverscaleFactor);
+    if (!ids.empty()) {
+        for(const auto& idealDataTileID : ids) {
+            auto tile = getTileFn(idealDataTileID);
+            if(!tile){
+                tile = createTileFn(idealDataTileID);
+                if(tile == nullptr) {
+                    continue;
+                }
+            }
+            requestTileData(*tile, TileNecessity::Required);
+        }
+    }
+    {
+        auto tilesIt = freeTiles.begin();
+        auto retainIt = retain.begin();
+        while (tilesIt != freeTiles.end()) {
+            if (retainIt == retain.end() || tilesIt->first < *retainIt) {
+                tilesIt->second->setNecessity(TileNecessity::Optional);
+                cache.add(tilesIt->first, std::move(tilesIt->second));
+                freeTiles.erase(tilesIt++);
+            } else {
+                if (!(*retainIt < tilesIt->first)) {
+                    ++tilesIt;
+                }
+                ++retainIt;
+            }
+        }
+    }
 
     return renderTiles;
 }
@@ -482,11 +513,19 @@ std::unordered_map<std::string, std::vector<Feature>> TilePyramid::queryRendered
     return result;
 }
 
-std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& options) const {
+std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& options, const OverscaledTileID& id) const {
     std::vector<Feature> result;
 
-    for (const auto& pair : tiles) {
-        pair.second->querySourceFeatures(result, options);
+    if(id.canonical == OverscaledTileID(0, 0, 0).canonical) {
+        //默认参数，全部查询
+        for (const auto& pair : tiles) {
+            pair.second->querySourceFeatures(result, options);
+        }
+    } else {
+        auto tile = getTileInAll(id);
+        if(tile != nullptr) {
+            tile->querySourceFeatures(result, options);
+        }
     }
 
     return result;

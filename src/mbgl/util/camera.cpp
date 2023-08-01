@@ -259,4 +259,12 @@ void FreeCameraOptions::setPitchBearing(double pitch, double bearing) {
     orientation = util::orientationFromPitchBearing(pitch * util::DEG2RAD, bearing * util::DEG2RAD).m;
 }
 
+void FreeCameraOptions::setFov(float camFov) {
+    fov = camFov;
+}
+
+void FreeCameraOptions::setSize(float width, float height) {
+    size = Size(width, height);
+}
+
 } // namespace mbgl

@@ -17,7 +17,10 @@ public:
                           const mat4& projMatrix) const override;
 
     std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const override;
+    querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const override;
+    std::vector<std::reference_wrapper<Tile>> findOrCreateTile(Immutable<style::Source::Impl>,
+                                                               const std::vector<Immutable<style::LayerProperties>>&,
+                                                               const TileParameters&) override;
 
 private:
     // RenderTileSetSource overrides

@@ -74,9 +74,10 @@ public:
     // If supported, returns pointer to image data; returns nullptr otherwise.
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
-    std::vector<std::reference_wrapper<Tile>> findOrCreateTile(Immutable<style::Source::Impl>,
+    virtual std::vector<std::reference_wrapper<Tile>> findOrCreateTile(Immutable<style::Source::Impl>,
                                                      const std::vector<Immutable<style::LayerProperties>>&,
                                                      const TileParameters&);
+    virtual Tile* getTile(const OverscaledTileID&) const;
 
     virtual std::unordered_map<std::string, std::vector<Feature>>
     queryRenderedFeatures(const ScreenLineString& geometry,
@@ -86,7 +87,7 @@ public:
                           const mat4& projMatrix) const = 0;
 
     virtual std::vector<Feature>
-    querySourceFeatures(const SourceQueryOptions&) const = 0;
+    querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const = 0;
 
     virtual FeatureExtensionValue
     queryFeatureExtensions(const Feature&,

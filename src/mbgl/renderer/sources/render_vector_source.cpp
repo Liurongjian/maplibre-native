@@ -38,7 +38,11 @@ std::vector<std::reference_wrapper<Tile>> RenderVectorSource::findOrCreateTile(I
                                          const std::vector<Immutable<style::LayerProperties>> &layers,
                                          const TileParameters &parameters) {
     auto tileset = getTileset();
-    return tilePyramid.findOrCreateTiles(layers, parameters, *impl, util::tileSize_I,
+    if(tileset == nullopt) {
+        //未准备好
+        return {};
+    }
+    return tilePyramid.findOrCreateTiles(layers, parameters, *impl, util::tileSize,
                                          tileset->zoomRange, tileset->bounds,
                                          [&](const OverscaledTileID &tileID) {
                                              return std::make_unique<VectorTile>(tileID,

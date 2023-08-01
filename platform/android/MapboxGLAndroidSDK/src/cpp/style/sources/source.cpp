@@ -21,6 +21,7 @@
 #include <mbgl/style/sources/image_source.hpp>
 #include <mbgl/style/sources/raster_source.hpp>
 #include <mbgl/style/sources/vector_source.hpp>
+#include "mbgl/renderer/update_parameters.hpp"
 
 // Android Source peers
 #include "geojson_source.hpp"
@@ -30,6 +31,7 @@
 #include "vector_source.hpp"
 #include "custom_geometry_source.hpp"
 #include "raster_dem_source.hpp"
+#include "mbgl/map/transform.hpp"
 
 namespace mbgl {
 namespace android {
@@ -45,6 +47,8 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
         return std::make_unique<GeoJSONSource>(env, *coreSource.as<mbgl::style::GeoJSONSource>(), frontend);
     } else if (coreSource.is<mbgl::style::ImageSource>()) {
         return std::make_unique<ImageSource>(env, *coreSource.as<mbgl::style::ImageSource>(), frontend);
+    } else if(coreSource.is<mbgl::style::RasterDEMSource>()) {
+        return std::make_unique<RasterDEMSource>(env, *coreSource.as<mbgl::style::RasterDEMSource>(), frontend);
     } else {
         return std::make_unique<UnknownSource>(env, coreSource, frontend);
     }
@@ -200,6 +204,66 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
         return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
     }
 
+    jni::Local<jni::Array<jni::Object<TileId>>> Source::findFreeCameraTiles(JNIEnv& env, jni::jdouble bearing, jni::jdouble pitch,
+                                                                            jni::jdouble latitude, jni::jdouble longitude, jni::jdouble alt,
+                                                                            jni::jint width, jni::jint height, jni::jfloat fov) {
+        FreeCameraOptions camera = FreeCameraOptions();
+        LatLngAltitude location = LatLngAltitude();
+        location.location = mbgl::LatLng(latitude, longitude);
+        location.altitude = alt;
+        camera.setLocation(location);
+        camera.setSize(width, height);
+        camera.setFov(fov);
+        camera.setPitchBearing(pitch, bearing);
+
+        std::shared_ptr<UpdateParameters> updateParams = rendererFrontend->getBackupParams();
+        if(updateParams == nullptr) {
+            return jni::Array<jni::Object<TileId>>::New(env, 0);
+        }
+
+        auto state = updateParams->transformState;
+        if(camera.size != nullopt) {
+            state.setSize(camera.size.value());
+        }
+        if(camera.fov != nullopt) {
+            state.setFieldOfView(camera.fov.value());
+        }
+        std::unique_ptr<Transform> tranCopy = std::make_unique<Transform>(state);
+        tranCopy->setFreeCameraOptions(camera);
+        UpdateParameters params = {
+                updateParams->styleLoaded,
+                updateParams->mode,
+                updateParams->pixelRatio,
+                updateParams->debugOptions,
+                updateParams->timePoint,
+                tranCopy->getState(),
+                updateParams->glyphURL,
+                updateParams->spriteLoaded,
+                updateParams->transitionOptions,
+                updateParams->light,
+                updateParams->images,
+                updateParams->sources,
+                updateParams->layers,
+                updateParams->annotationManager,
+                updateParams->fileSource,
+                updateParams->prefetchZoomDelta,
+                updateParams->stillImageRequest,
+                updateParams->crossSourceCollisions
+        };
+
+        auto tiles = rendererFrontend->findOrCreateTiles(std::make_shared<UpdateParameters>(std::move(params)), source.getID());
+        auto tileArrays = jni::Array<jni::Object<TileId>>::New(env, tiles.size());
+        int index = 0;
+        for(auto tile : tiles) {
+            auto tileId = tile.get().id.canonical;
+            auto overscaledZ = tile.get().id.overscaledZ;
+            auto wrap = tile.get().id.wrap;
+            tileArrays.Set(env, index, TileId::New(env, tileId.x, tileId.y, tileId.z, overscaledZ, wrap, tile.get().isLoaded()));
+            index ++;
+        }
+        return tileArrays;
+    }
+
     void Source::releaseJavaPeer() {
         // We can't release the peer if the source was not removed from the map
         if (!ownedSource) {
@@ -237,6 +301,7 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
             METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
             METHOD(&Source::isVolatile, "nativeIsVolatile"),
             METHOD(&Source::setVolatile, "nativeSetVolatile"),
+            METHOD(&Source::findFreeCameraTiles, "nativeFindFreeCameraTiles"),
             METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
             METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
 

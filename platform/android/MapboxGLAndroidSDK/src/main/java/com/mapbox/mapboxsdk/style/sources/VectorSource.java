@@ -9,6 +9,7 @@ import androidx.annotation.Size;
 import androidx.annotation.UiThread;
 
 import com.mapbox.geojson.Feature;
+import com.mapbox.mapboxsdk.maps.TileId;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 
 import java.net.URL;
@@ -131,6 +132,16 @@ public class VectorSource extends Source {
     return features != null ? Arrays.asList(features) : new ArrayList<Feature>();
   }
 
+  @NonNull
+  public List<Feature> queryTileFeatures(@Size(min = 1) String[] sourceLayerIds, TileId tileId,
+                                           @Nullable Expression filter) {
+    checkThread();
+    Feature[] features = queryTileFeatures(tileId,
+        sourceLayerIds,
+        filter != null ? filter.toArray() : null);
+    return features != null ? Arrays.asList(features) : new ArrayList<Feature>();
+  }
+
   /**
    * @return The url or null
    * @deprecated use {@link #getUri()} instead
@@ -168,5 +179,8 @@ public class VectorSource extends Source {
   @Keep
   private native Feature[] querySourceFeatures(String[] sourceLayerId,
                                                Object[] filter);
+
+  private native Feature[] queryTileFeatures(TileId tileId, String[] sourceLayerId,
+                                             Object[] filter);
 
 }

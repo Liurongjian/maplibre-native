@@ -59,7 +59,7 @@ public:
                           const RenderedQueryOptions& options,
                           const mat4& projMatrix) const final;
 
-    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const final;
+    std::vector<Feature> querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const final;
 
     void reduceMemoryUse() final {
     }
