@@ -135,12 +135,9 @@ public:
         return defaultTransformState;
     }
 
-    std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(std::shared_ptr<UpdateParameters>, const std::string& sourceID) const override {
-        if(sourceID.empty()) {
-        }
+    std::vector<std::reference_wrapper<Tile>> requestTiles(std::shared_ptr<UpdateParameters>, std::vector<CanonicalTileID>, const std::string& ) const override {
         return {};
     }
-
 
     PremultipliedImage takeImage() { return renderer->actor().ask(&SnapshotterRenderer::takeImage).get(); }
 

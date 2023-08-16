@@ -197,6 +197,8 @@ public:
 
     jni::Local<jni::Object<TransitionOptions>> getTransitionOptions(JNIEnv&);
 
+    jni::Local<jni::Array<jdouble>> getCameraProjectMatrix(JNIEnv& env);
+
     void setTransitionOptions(JNIEnv&, const jni::Object<TransitionOptions>&);
 
     jni::Local<jni::Array<jlong>> queryPointAnnotations(JNIEnv&, const jni::Object<RectF>&);

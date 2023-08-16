@@ -447,6 +447,10 @@ double Map::getTopOffsetPixelsForAnnotationImage(const std::string& id) {
     return 0.0;
 }
 
+const mat4& Map::getCameraProjectMatrix() {
+    return impl->transform.getState().getProjectionMatrix();
+}
+
 AnnotationID Map::addAnnotation(const Annotation& annotation) {
     if (LayerManager::annotationsEnabled) {
         auto result = impl->annotationManager.addAnnotation(annotation);

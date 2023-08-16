@@ -157,8 +157,13 @@ public abstract class Source {
     return nativeGetMinimumTileUpdateInterval();
   }
 
-  public List<TileId> findFreeCameraTiles(LatLng location, double bearing, double pitch, int width, int height, float fov) {
-    TileId[] tileIds = nativeFindFreeCameraTiles(bearing, pitch, location.getLatitude(), location.getLongitude(), location.getAltitude(), width, height, fov);
+  /**
+   * 请求瓦片资源
+   * @param ids
+   * @return
+   */
+  public List<TileId> requestTiles(List<TileId> ids) {
+    TileId[] tileIds = nativeRequestTiles(ids.toArray(new TileId[0]));
     return Arrays.asList(tileIds);
   }
 
@@ -203,9 +208,7 @@ public abstract class Source {
   @Keep
   protected native void nativeSetVolatile(Boolean value);
 
-  protected native TileId[] nativeFindFreeCameraTiles(double bearing, double pitch,
-                                                      double latitude, double longitude, double alt,
-                                                      int width, int height, float fov);
+  protected native TileId[] nativeRequestTiles(TileId[] ids);
 
   @NonNull
   @Keep

@@ -52,6 +52,7 @@ public:
     std::unique_ptr<RenderTree> createRenderTree(const std::shared_ptr<UpdateParameters>&);
 
     const std::vector<std::reference_wrapper<Tile>> findOrCreateSourceTiles(const std::shared_ptr<UpdateParameters>&, const std::string& sourceID);
+    std::vector<std::reference_wrapper<Tile>> requestTiles(const std::shared_ptr<UpdateParameters>&, std::vector<CanonicalTileID> tileIds, const std::string& sourceId) const;
 
     std::vector<Feature> queryRenderedFeatures(const ScreenLineString&, const RenderedQueryOptions&) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions&, const OverscaledTileID& id) const;

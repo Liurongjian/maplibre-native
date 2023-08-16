@@ -73,11 +73,14 @@ void RenderSource::onTileError(Tile& tile, std::exception_ptr error) {
 bool RenderSource::isEnabled() const {
     return enabled;
 }
-std::vector<std::reference_wrapper<Tile>> RenderSource::findOrCreateTile(Immutable<style::Source::Impl>,
-                                       const std::vector<Immutable<style::LayerProperties>>&,
-                                       const TileParameters&) {
+
+std::vector<std::reference_wrapper<Tile>> RenderSource::requestTiles(Immutable<style::Source::Impl> ,
+                                                                     std::vector<CanonicalTileID> ,
+                                                                     const std::vector<Immutable<style::LayerProperties>> &,
+                                                                     const TileParameters &) {
     return {};
 }
+
 Tile* RenderSource::getTile(const OverscaledTileID&) const{
     return nullptr;
 }

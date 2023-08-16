@@ -98,8 +98,10 @@ std::vector<Feature> Renderer::querySourceFeatures(const std::string& sourceID, 
     return impl->orchestrator.querySourceFeatures(sourceID, options, id);
 }
 
-std::vector<std::reference_wrapper<Tile>> Renderer::findOrCreateTile(const std::string& sourceID, const std::shared_ptr<UpdateParameters>& updateParameters) const {
-    return impl->orchestrator.findOrCreateSourceTiles(updateParameters, sourceID);
+std::vector<std::reference_wrapper<Tile>> Renderer::requestTiles(const std::shared_ptr<UpdateParameters>& updateParameters,
+                                                                 std::vector<CanonicalTileID> tileIds,
+                                                                 const std::string& sourceId) const {
+    return impl->orchestrator.requestTiles(updateParameters, tileIds, sourceId);
 }
 
 Tile* Renderer::querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const {

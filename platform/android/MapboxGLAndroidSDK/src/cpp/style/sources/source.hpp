@@ -62,10 +62,10 @@ public:
     void setMinimumTileUpdateInterval(JNIEnv&, jni::Long &);
 
     jni::Local<jni::Long> getMinimumTileUpdateInterval(JNIEnv&);
-
-    jni::Local<jni::Array<jni::Object<TileId>>> findFreeCameraTiles(JNIEnv& env, jni::jdouble bearing, jni::jdouble pitch,
-                                                                    jni::jdouble latitude, jni::jdouble longitude, jni::jdouble alt,
-                                                                    jni::jint width, jni::jint height, jni::jfloat fov);
+    /**
+     * 请求瓦片资源, 返回mapbox内部请求的瓦片情况，是否已加载等情况
+     */
+    jni::Local<jni::Array<jni::Object<TileId>>> requestTiles(JNIEnv& env, jni::Array<jni::Object<TileId>> &);
 
 protected:
     // Set on newly created sources until added to the map.

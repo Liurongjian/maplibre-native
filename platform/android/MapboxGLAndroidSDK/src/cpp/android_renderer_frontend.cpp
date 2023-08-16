@@ -142,8 +142,8 @@ FeatureExtensionValue AndroidRendererFrontend::queryFeatureExtensions(const std:
     return mapRenderer.actor().ask(&Renderer::queryFeatureExtensions, sourceID, feature, extension, extensionField, args).get();
 }
 
-std::vector<std::reference_wrapper<Tile>> AndroidRendererFrontend::findOrCreateTiles(std::shared_ptr<UpdateParameters> updateParameters, const std::string& sourceID) const {
-    return mapRenderer.actor().ask(&Renderer::findOrCreateTile, sourceID, updateParameters).get();
+std::vector<std::reference_wrapper<Tile>> AndroidRendererFrontend::requestTiles(std::shared_ptr<UpdateParameters> updateParameters, std::vector<CanonicalTileID> tileIds, const std::string& sourceId) const {
+    return mapRenderer.actor().ask(&Renderer::requestTiles, updateParameters, tileIds, sourceId).get();
 }
 
 Tile* AndroidRendererFrontend::querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const {

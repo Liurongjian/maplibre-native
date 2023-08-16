@@ -26,3 +26,7 @@
 *.gpg
 /.vscode
 /platform/android/signing-key.text
+/benchmark/android/.gradle/
+/render-test/android/.gradle/
+/test/android/.gradle/
+/docs/doxygen/

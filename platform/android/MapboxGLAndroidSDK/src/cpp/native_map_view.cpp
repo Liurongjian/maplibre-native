@@ -28,6 +28,7 @@
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/filter.hpp>
 #include <mbgl/renderer/query.hpp>
+#include <mbgl/util/mat4.hpp>
 
 // Java -> C++ conversion
 #include "style/android_conversion.hpp"
@@ -804,6 +805,18 @@ jni::Local<jni::Object<TransitionOptions>> NativeMapView::getTransitionOptions(J
     return TransitionOptions::fromTransitionOptions(env, duration, delay, enablePlacementTransitions);
 }
 
+jni::Local<jni::Array<jdouble>> NativeMapView::getCameraProjectMatrix(JNIEnv& env) {
+    const mat4& mat = map->getCameraProjectMatrix();
+    std::vector<jni::jdouble> data;
+    data.reserve(mat.size());
+    for(auto element: mat) {
+        data.push_back(element);
+    }
+    auto result = jni::Array<jni::jdouble>::New(env, data.size());
+    result.SetRegion<std::vector<jni::jdouble>>(env, 0, data);
+    return result;
+}
+
 void NativeMapView::setTransitionOptions(JNIEnv& env, const jni::Object<TransitionOptions>& options) {
     const mbgl::style::TransitionOptions transitionOptions(
             Duration(mbgl::Milliseconds(TransitionOptions::getDuration(env, options))),
@@ -1257,6 +1270,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
         METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
+        METHOD(&NativeMapView::getCameraProjectMatrix, "nativeGetCameraProjectMatrix");
 }
 
 } // namespace android

@@ -1153,10 +1153,17 @@ final class NativeMapView implements NativeMap {
     }
   }
 
+  @Override @Keep
+  public double[] getCameraProjectMatrix() {
+    return nativeGetCameraProjectMatrix();
+  }
+
   //
   // JNI methods
   //
 
+  @Keep
+  private native double[] nativeGetCameraProjectMatrix();
   @Keep
   private native void nativeInitialize(NativeMapView nativeMap,
                                        FileSource fileSource,

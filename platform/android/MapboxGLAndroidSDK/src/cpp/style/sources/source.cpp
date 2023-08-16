@@ -204,39 +204,16 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
         return jni::Box(env, jni::jlong(source.getMinimumTileUpdateInterval().count() / 1000000));
     }
 
-    jni::Local<jni::Array<jni::Object<TileId>>> Source::findFreeCameraTiles(JNIEnv& env, jni::jdouble bearing, jni::jdouble pitch,
-                                                                            jni::jdouble latitude, jni::jdouble longitude, jni::jdouble alt,
-                                                                            jni::jint width, jni::jint height, jni::jfloat fov) {
-        FreeCameraOptions camera = FreeCameraOptions();
-        LatLngAltitude location = LatLngAltitude();
-        location.location = mbgl::LatLng(latitude, longitude);
-        location.altitude = alt;
-        camera.setLocation(location);
-        camera.setSize(width, height);
-        camera.setFov(fov);
-        camera.setPitchBearing(pitch, bearing);
+    jni::Local<jni::Array<jni::Object<TileId>>> Source::requestTiles(JNIEnv& env, jni::Array<jni::Object<TileId>>& tilesId) {
 
         std::shared_ptr<UpdateParameters> updateParams = rendererFrontend->getBackupParams();
-        if(updateParams == nullptr) {
-            return jni::Array<jni::Object<TileId>>::New(env, 0);
-        }
-
-        auto state = updateParams->transformState;
-        if(camera.size != nullopt) {
-            state.setSize(camera.size.value());
-        }
-        if(camera.fov != nullopt) {
-            state.setFieldOfView(camera.fov.value());
-        }
-        std::unique_ptr<Transform> tranCopy = std::make_unique<Transform>(state);
-        tranCopy->setFreeCameraOptions(camera);
         UpdateParameters params = {
                 updateParams->styleLoaded,
                 updateParams->mode,
                 updateParams->pixelRatio,
                 updateParams->debugOptions,
                 updateParams->timePoint,
-                tranCopy->getState(),
+                updateParams->transformState,
                 updateParams->glyphURL,
                 updateParams->spriteLoaded,
                 updateParams->transitionOptions,
@@ -251,7 +228,18 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
                 updateParams->crossSourceCollisions
         };
 
-        auto tiles = rendererFrontend->findOrCreateTiles(std::make_shared<UpdateParameters>(std::move(params)), source.getID());
+        std::vector<CanonicalTileID> ids;
+        std::size_t len = tilesId.Length(env);
+        ids.reserve(len);
+        for(int i = 0; i < len ; i++ ) {
+            auto tileId = tilesId.Get(env, i);
+            int x = TileId::getX(env, tileId);
+            int y = TileId::getY(env, tileId);
+            int z = TileId::getZ(env, tileId);
+            ids.push_back({(uint8_t)z, (uint32_t)x, (uint32_t)y});
+        }
+
+        auto tiles = rendererFrontend->requestTiles(std::make_shared<UpdateParameters>(std::move(params)), ids, source.getID());
         auto tileArrays = jni::Array<jni::Object<TileId>>::New(env, tiles.size());
         int index = 0;
         for(auto tile : tiles) {
@@ -301,7 +289,7 @@ static std::unique_ptr<Source> createSourcePeer(jni::JNIEnv& env,
             METHOD(&Source::getMaxOverscaleFactorForParentTiles, "nativeGetMaxOverscaleFactorForParentTiles"),
             METHOD(&Source::isVolatile, "nativeIsVolatile"),
             METHOD(&Source::setVolatile, "nativeSetVolatile"),
-            METHOD(&Source::findFreeCameraTiles, "nativeFindFreeCameraTiles"),
+            METHOD(&Source::requestTiles, "nativeRequestTiles"),
             METHOD(&Source::setMinimumTileUpdateInterval, "nativeSetMinimumTileUpdateInterval"),
             METHOD(&Source::getMinimumTileUpdateInterval, "nativeGetMinimumTileUpdateInterval"));
 

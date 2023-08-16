@@ -13,6 +13,7 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/map/projection_mode.hpp>
 #include <mbgl/storage/resource_options.hpp>
+#include <mbgl/util/mat4.hpp>
 
 #include <cstdint>
 #include <string>
@@ -114,6 +115,7 @@ public:
     void addAnnotationImage(std::unique_ptr<style::Image>);
     void removeAnnotationImage(const std::string&);
     double getTopOffsetPixelsForAnnotationImage(const std::string&);
+    const mat4& getCameraProjectMatrix();
 
     AnnotationID addAnnotation(const Annotation&);
     void updateAnnotation(AnnotationID, const Annotation&);

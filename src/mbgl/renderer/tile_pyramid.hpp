@@ -44,13 +44,10 @@ public:
                 optional<LatLngBounds> bounds,
                 std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile);
 
-    const std::vector<std::reference_wrapper<Tile>> findOrCreateTiles(const std::vector<Immutable<style::LayerProperties>>& visibleLayers,
-                                        const TileParameters&,
-                                        const style::Source::Impl&,
-                                        uint16_t tileSize,
-                                        Range<uint8_t> zoomRange,
-                                        optional<LatLngBounds> bounds,
-                                        std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile);
+    std::vector<std::reference_wrapper<Tile>> requestTiles(const std::vector<Immutable<style::LayerProperties>> &layers,
+                                                           std::vector<CanonicalTileID> tileIds,
+                                                           const style::Source::Impl &sourceImpl, Range<uint8_t> zoomRange,
+                                                           std::function<std::unique_ptr<Tile>(const OverscaledTileID &)> createTile);
 
     const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
     Tile* getTile(const OverscaledTileID&);

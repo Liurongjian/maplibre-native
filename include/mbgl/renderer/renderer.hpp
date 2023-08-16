@@ -58,7 +58,9 @@ public:
     std::vector<Feature> queryRenderedFeatures(const ScreenCoordinate& point, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> queryRenderedFeatures(const ScreenBox& box, const RenderedQueryOptions& options = {}) const;
     std::vector<Feature> querySourceFeatures(const std::string& sourceID, const SourceQueryOptions& options = {}, const OverscaledTileID& id = {0, 0, 0}) const;
-    std::vector<std::reference_wrapper<Tile>> findOrCreateTile(const std::string& sourceID, const std::shared_ptr<UpdateParameters>& updateParameters) const;
+    std::vector<std::reference_wrapper<Tile>> requestTiles(const std::shared_ptr<UpdateParameters>& updateParameters,
+                                                           std::vector<CanonicalTileID> tileIds,
+                                                           const std::string& sourceId) const;
     Tile* querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const;
     AnnotationIDs queryPointAnnotations(const ScreenBox& box) const;
     AnnotationIDs queryShapeAnnotations(const ScreenBox& box) const;

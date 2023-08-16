@@ -18,9 +18,10 @@ public:
 
     std::vector<Feature>
     querySourceFeatures(const SourceQueryOptions&, const OverscaledTileID& ) const override;
-    std::vector<std::reference_wrapper<Tile>> findOrCreateTile(Immutable<style::Source::Impl>,
-                                                               const std::vector<Immutable<style::LayerProperties>>&,
-                                                               const TileParameters&) override;
+    std::vector<std::reference_wrapper<Tile>> requestTiles(Immutable<style::Source::Impl> impl,
+                                                           std::vector<CanonicalTileID> tileIds,
+                                                           const std::vector<Immutable<style::LayerProperties>> &layers,
+                                                           const TileParameters &parameters) override;
 
 private:
     // RenderTileSetSource overrides

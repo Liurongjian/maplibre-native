@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 
 import androidx.annotation.IntRange;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -207,6 +208,8 @@ interface NativeMap {
   void getVisibleCoordinateBounds(@NonNull double[] output);
 
   LatLng latLngForPixel(@NonNull PointF pixel);
+
+  double[] getCameraProjectMatrix();
 
   void latLngsForPixels(@NonNull double[] input, @NonNull double[] output);
 

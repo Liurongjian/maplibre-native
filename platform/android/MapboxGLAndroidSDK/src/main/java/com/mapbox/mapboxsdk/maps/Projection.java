@@ -96,6 +96,10 @@ public class Projection {
     return nativeMapView.latLngForPixel(point);
   }
 
+  public double[] getProjectMatrix() {
+    return nativeMapView.getCameraProjectMatrix();
+  }
+
 
   /**
    * Returns the geographic locations that corresponds to screen locations.
