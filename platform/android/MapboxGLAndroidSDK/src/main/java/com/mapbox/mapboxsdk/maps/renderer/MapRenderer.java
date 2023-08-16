@@ -34,6 +34,8 @@ public abstract class MapRenderer implements MapRendererScheduler {
   private double expectedRenderTime = 0;
   private MapboxMap.OnFpsChangedListener onFpsChangedListener;
 
+  private IRenderer mRenderer;
+
   public MapRenderer(@NonNull Context context, String localIdeographFontFamily) {
     float pixelRatio = context.getResources().getDisplayMetrics().density;
 
@@ -41,7 +43,15 @@ public abstract class MapRenderer implements MapRendererScheduler {
     nativeInitialize(this, pixelRatio, localIdeographFontFamily);
   }
 
-  public void onStart() {
+    public IRenderer getRenderer() {
+        return mRenderer;
+    }
+
+    public void setRenderer(IRenderer renderer) {
+        mRenderer = renderer;
+    }
+
+    public void onStart() {
     // Implement if needed
   }
 
@@ -68,12 +78,18 @@ public abstract class MapRenderer implements MapRendererScheduler {
   @CallSuper
   protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
     nativeOnSurfaceCreated();
+      if (mRenderer != null) {
+          mRenderer.onSurfaceCreated(gl, config);
+      }
   }
 
   @CallSuper
   protected void onSurfaceChanged(@NonNull GL10 gl, int width, int height) {
     gl.glViewport(0, 0, width, height);
     nativeOnSurfaceChanged(width, height);
+      if (mRenderer != null) {
+          mRenderer.onSurfaceChanged(gl, width, height);
+      }
   }
 
   @CallSuper
@@ -100,6 +116,9 @@ public abstract class MapRenderer implements MapRendererScheduler {
     if (onFpsChangedListener != null) {
       updateFps();
     }
+      if (mRenderer != null) {
+          mRenderer.onDrawFrame(gl);
+      }
   }
 
   /**

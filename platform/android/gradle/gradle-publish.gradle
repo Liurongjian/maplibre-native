@@ -1,5 +1,5 @@
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
+//apply plugin: 'signing'
 apply from: "${rootDir}/gradle/artifact-settings.gradle"
 apply from: "${rootDir}/gradle/publish-root.gradle"
 
@@ -74,6 +74,21 @@ afterEvaluate {
                 }
             }
         }
+        repositories {
+            maven {
+                name = "LocalTest2"
+                // change to point to your repo, e.g. http://my.org/repo
+                url = "file://tmp/000/.m2"
+            }
+
+            maven {
+                name = "LocalMavenTest"
+                // change to point to your repo, e.g. http://my.org/repo
+                url = "file://tmp/000/.m2"
+            }
+
+
+        }
     }
 }
 
@@ -85,7 +100,7 @@ afterEvaluate { project ->
     }
 }
 
-signing {
-    sign publishing.publications
-}
+//signing {
+//    sign publishing.publications
+//}
 

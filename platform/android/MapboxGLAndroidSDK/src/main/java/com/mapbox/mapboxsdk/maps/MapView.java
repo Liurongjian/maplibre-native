@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -27,6 +28,8 @@ import com.mapbox.mapboxsdk.annotations.Annotation;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.exceptions.MapboxConfigurationException;
 import com.mapbox.mapboxsdk.location.LocationComponent;
+import com.mapbox.mapboxsdk.maps.renderer.ICustomRenderer;
+import com.mapbox.mapboxsdk.maps.renderer.IRenderer;
 import com.mapbox.mapboxsdk.maps.renderer.MapRenderer;
 import com.mapbox.mapboxsdk.maps.renderer.glsurfaceview.GLSurfaceViewMapRenderer;
 import com.mapbox.mapboxsdk.maps.renderer.glsurfaceview.MapboxGLSurfaceView;
@@ -96,6 +99,8 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   private Bundle savedInstanceState;
   private boolean isStarted;
 
+  private ICustomRenderer mCustomRenderer;
+
   @UiThread
   public MapView(@NonNull Context context) {
     super(context);
@@ -119,6 +124,14 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     super(context);
     initialize(context, options == null ? MapboxMapOptions.createFromAttributes(context) : options);
   }
+
+    public ICustomRenderer getCustomRenderer() {
+        return mCustomRenderer;
+    }
+
+    public void setCustomRenderer(ICustomRenderer customRenderer) {
+        mCustomRenderer = customRenderer;
+    }
 
   @CallSuper
   @UiThread
@@ -303,6 +316,28 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   private void initialiseDrawingSurface(MapboxMapOptions options) {
+      final IRenderer customRenderer = new IRenderer() {
+          @Override
+          public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+              if (mCustomRenderer != null) {
+                  mCustomRenderer.onSurfaceCreated(gl10, eglConfig);
+              }
+          }
+
+          @Override
+          public void onSurfaceChanged(GL10 gl10, int i, int i1) {
+              if (mCustomRenderer != null) {
+                  mCustomRenderer.onSurfaceChanged(gl10, i, i1);
+              }
+          }
+
+          @Override
+          public void onDrawFrame(GL10 gl10) {
+              if (mCustomRenderer != null) {
+                  mCustomRenderer.onDrawFrame(gl10);
+              }
+          }
+      };
     String localFontFamily = options.getLocalIdeographFontFamily();
     if (options.getTextureMode()) {
       TextureView textureView = new TextureView(getContext());
@@ -315,7 +350,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
           super.onSurfaceCreated(gl, config);
         }
       };
-
+      mapRenderer.setRenderer(customRenderer);
       addView(textureView, 0);
       renderView = textureView;
     } else {
@@ -328,7 +363,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
           super.onSurfaceCreated(gl, config);
         }
       };
-
+      mapRenderer.setRenderer(customRenderer);
+        if (mCustomRenderer != null) {
+            mCustomRenderer.onViewCreate(glSurfaceView);
+        }
       addView(glSurfaceView, 0);
       renderView = glSurfaceView;
     }
