@@ -14,7 +14,6 @@ import com.mapbox.mapboxsdk.style.sources.RasterDemSource;
 public class RasterDemTile {
     private TileId mId;
     private Bitmap mData;
-    private RasterDemSource mSource;
     private boolean isLoadData;
 
     //四个角的经纬度
@@ -25,8 +24,7 @@ public class RasterDemTile {
      */
     public int flag;
 
-    public RasterDemTile(RasterDemSource source, TileId id) {
-        mSource = source;
+    public RasterDemTile(TileId id) {
         mId = id;
     }
 
@@ -34,13 +32,9 @@ public class RasterDemTile {
         return mId;
     }
 
-    public void setSource(RasterDemSource source) {
-        mSource = source;
-    }
-
-    public void loadDemData() {
-        if(mId.isLoaded) {
-            mData = mSource.queryTileBitmap(mId);
+    public void loadDemData(RasterDemSource source) {
+        if(mId.isLoaded && source != null) {
+            mData = source.queryTileBitmap(mId);
             isLoadData = true;
         }
     }

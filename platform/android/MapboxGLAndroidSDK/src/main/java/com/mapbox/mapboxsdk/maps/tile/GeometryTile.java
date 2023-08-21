@@ -18,8 +18,6 @@ import java.util.List;
 public class GeometryTile {
     private TileId mId;
     private List<Feature> mFeatures;
-    private VectorSource mSource;
-
     private boolean isFeatureLoad;
     private String[] mLoadLayerIds;
     private Expression mLoadFilter;
@@ -27,15 +25,14 @@ public class GeometryTile {
     //四个角的经纬度
     public LatLngBounds bounds;
 
-    public GeometryTile(VectorSource source, TileId id) {
-        mSource = source;
+    public GeometryTile(TileId id) {
         mId = id;
     }
 
-    public void loadFeatures(@Size(min = 1) String[] sourceLayerIds,
+    public void loadFeatures(VectorSource source, @Size(min = 1) String[] sourceLayerIds,
                              @Nullable Expression filter) {
-        if(mId.isLoaded) {
-            mFeatures = mSource.queryTileFeatures(sourceLayerIds, mId, filter);
+        if(mId.isLoaded && source != null) {
+            mFeatures = source.queryTileFeatures(sourceLayerIds, mId, filter);
             mLoadLayerIds = sourceLayerIds;
             mLoadFilter = filter;
             isFeatureLoad = true;
