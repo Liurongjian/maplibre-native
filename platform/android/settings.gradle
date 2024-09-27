@@ -1,1 +1,3 @@
 include ':MapboxGLAndroidSDK', ':MapboxGLAndroidSDKTestApp', ':MapboxGLAndroidSDKLint'
+include ':maplibre-sdk-src'
+project(':maplibre-sdk-src').projectDir = new File("../../")
