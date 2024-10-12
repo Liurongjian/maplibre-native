@@ -30,6 +30,8 @@
 #include <android/native_window.h>
 #include <EGL/egl.h>
 #include <jni/jni.hpp>
+#include "map/tile_android.hpp"
+#include <mbgl/util/async_request.hpp>
 
 namespace mbgl {
 namespace android {
@@ -42,6 +44,12 @@ class NativeMapView : public MapObserver {
 public:
 
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/maps/NativeMapView"; };
+
+    struct ResponseCallback {
+        static constexpr auto Name()  { return "com/mapbox/mapboxsdk/storage/FileSource$ResponseCallback";}
+        static void onResult(jni::JNIEnv&, const jni::Object<NativeMapView::ResponseCallback>&,
+                             const jni::jint, const jni::Local<jni::Array<jni::jbyte>> &);
+    };
 
     static void registerNative(jni::JNIEnv&);
 
@@ -256,6 +264,8 @@ public:
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
+
+    void request(jni::JNIEnv&, const jni::String & tempURL, const jni::Object<TileId>&, const jni::Object<NativeMapView::ResponseCallback> &);
 
 private:
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;

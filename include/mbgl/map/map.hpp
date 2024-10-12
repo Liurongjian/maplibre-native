@@ -145,6 +145,8 @@ public:
     void setFreeCameraOptions(const FreeCameraOptions& camera);
     FreeCameraOptions getFreeCameraOptions() const;
 
+    std::shared_ptr<FileSource> getFileSource() const;
+
 protected:
     class Impl;
     const std::unique_ptr<Impl> impl;

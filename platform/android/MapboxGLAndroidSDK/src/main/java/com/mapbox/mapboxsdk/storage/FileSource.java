@@ -16,6 +16,7 @@ import com.mapbox.mapboxsdk.MapStrictMode;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.log.Logger;
+import com.mapbox.mapboxsdk.maps.TileId;
 import com.mapbox.mapboxsdk.utils.FileUtils;
 import com.mapbox.mapboxsdk.utils.ThreadUtils;
 
@@ -77,6 +78,11 @@ public class FileSource {
      */
     void onError(@NonNull String message);
 
+  }
+
+  @Keep
+  public interface ResponseCallback {
+    void onResult(int code, byte[] data);
   }
 
   // File source instance is kept alive after initialization
@@ -413,5 +419,4 @@ public class FileSource {
   @Override
   @Keep
   protected native void finalize() throws Throwable;
-
 }

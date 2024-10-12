@@ -504,6 +504,10 @@ void Map::dumpDebugLogs() const {
     Log::Info(Event::General, "--------------------------------------------------------------------------------");
 }
 
+std::shared_ptr<FileSource> Map::getFileSource() const{
+    return impl->fileSource;
+}
+
 void Map::setFreeCameraOptions(const FreeCameraOptions& camera) {
     impl->transform.setFreeCameraOptions(camera);
     impl->cameraMutated = true;

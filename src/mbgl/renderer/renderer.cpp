@@ -104,6 +104,10 @@ std::vector<std::reference_wrapper<Tile>> Renderer::requestTiles(const std::shar
     return impl->orchestrator.requestTiles(updateParameters, tileIds, sourceId);
 }
 
+std::unique_ptr<AsyncRequest>  Renderer::reqTileData(std::shared_ptr<FileSource> fileSource, Resource res, std::function<void (Response)> callback) {
+    return fileSource->request(res, callback);
+}
+
 Tile* Renderer::querySourceTile(const std::string& sourceID, const OverscaledTileID& id) const {
     return impl->orchestrator.querySourceTile(sourceID, id);
 }

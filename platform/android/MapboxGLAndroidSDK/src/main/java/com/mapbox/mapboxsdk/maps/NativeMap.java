@@ -18,6 +18,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.geometry.ProjectedMeters;
+import com.mapbox.mapboxsdk.storage.FileSource;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
@@ -289,4 +290,6 @@ interface NativeMap {
   long getNativePtr();
 
   void addSnapshotCallback(@NonNull MapboxMap.SnapshotReadyCallback callback);
+
+  void requestTile(String urlTemplate, TileId tileId, FileSource.ResponseCallback callback);
 }

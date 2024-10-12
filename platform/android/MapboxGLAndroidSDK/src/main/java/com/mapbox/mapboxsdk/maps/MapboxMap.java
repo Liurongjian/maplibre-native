@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -40,6 +41,7 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.offline.OfflineRegionDefinition;
+import com.mapbox.mapboxsdk.storage.FileSource;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 
 import java.util.ArrayList;
@@ -863,6 +865,10 @@ public final class MapboxMap {
     if (!TextUtils.isEmpty(apiBaseUrl)) {
       nativeMapView.setApiBaseUrl(apiBaseUrl);
     }
+  }
+
+  public void requestTile(String urlTemplete, TileId tileId, FileSource.ResponseCallback callback) {
+      nativeMapView.requestTile(urlTemplete, tileId, callback);
   }
 
   //

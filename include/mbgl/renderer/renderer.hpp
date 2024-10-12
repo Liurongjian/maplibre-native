@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/storage/file_source.hpp>
+#include <mbgl/util/async_request.hpp>
 
 namespace mbgl {
 
@@ -18,6 +20,7 @@ class RenderedQueryOptions;
 class SourceQueryOptions;
 class UpdateParameters;
 class OverscaledTileID;
+class FileSource;
 
 namespace gfx {
 class RendererBackend;
@@ -110,6 +113,7 @@ public:
     // Memory
     void reduceMemoryUse();
     void clearData();
+    std::unique_ptr<AsyncRequest>  reqTileData(std::shared_ptr<FileSource> fileSource, Resource, std::function<void (Response)>);
 
 private:
     class Impl;

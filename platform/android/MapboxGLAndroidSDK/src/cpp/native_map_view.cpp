@@ -54,6 +54,7 @@
 #include "map_renderer.hpp"
 #include "run_loop_impl.hpp"
 #include "style/light.hpp"
+#include <mbgl/renderer/renderer.hpp>
 
 namespace mbgl {
 namespace android {
@@ -1161,6 +1162,47 @@ void NativeMapView::triggerRepaint(JNIEnv&) {
     map->triggerRepaint();
 }
 
+        void NativeMapView::request(jni::JNIEnv &env, const jni::String &tempURL, const jni::Object<TileId> &tileId,
+                                    const jni::Object<NativeMapView::ResponseCallback> &callback) {
+            auto resourceLoader = map->getFileSource();
+            if (!resourceLoader) {
+                auto data = jni::Array<jni::jbyte>::New(env, 0);
+                NativeMapView::ResponseCallback::onResult(env, callback, -1, data);
+                return;
+            }
+            std::string urlTemplate = jni::Make<std::string>(env, tempURL);
+            int x = TileId::getX(env, tileId);
+            int y = TileId::getY(env, tileId);
+            int z = TileId::getZ(env, tileId);
+            Resource resource = Resource::tile(
+                    urlTemplate, 1,
+                    x, y, z, Tileset::Scheme::XYZ,
+                    Resource::LoadingMethod::All);
+            bool test = resource.url.find("vtu=22", 0) > 0;
+            if (test) Log::Debug(mbgl::Event::JNI, "request tile! url = %s", resource.url.c_str());
+            auto req = mapRenderer.actor().ask(&Renderer::reqTileData, resourceLoader, resource, [&](const Response &res) {
+                Log::Debug(mbgl::Event::JNI, "request tile! 1");
+                if (!res.error) {
+                    Log::Debug(mbgl::Event::JNI, "request tile! 2");
+                    long size = res.data->size();
+                    auto data = jni::Array<jni::jbyte>::New(env, size);
+                    jni::SetArrayRegion(env, *data, 0, size, reinterpret_cast<const signed char *>(res.data->data()));
+                    NativeMapView::ResponseCallback::onResult(env, callback, 0, data);
+                } else {
+                    Log::Debug(mbgl::Event::JNI, "request tile! 3");
+                    auto data = jni::Array<jni::jbyte>::New(env, 0);
+                    NativeMapView::ResponseCallback::onResult(env, callback, -2, data);
+                }
+            }).get();
+        }
+
+        void NativeMapView::ResponseCallback::onResult(jni::JNIEnv &env, const jni::Object<NativeMapView::ResponseCallback> &callback,
+                                                       const jni::jint code, const jni::Local<jni::Array<jni::jbyte>> &data) {
+            static auto &javaClass = jni::Class<NativeMapView::ResponseCallback>::Singleton(env);
+            static auto method = javaClass.GetMethod<void(jni::jint, jni::Array<jni::jbyte>)>(env, "onResult");
+            callback.Call(env, method, code, data);
+        }
+
 // Static methods //
 
 void NativeMapView::registerNative(jni::JNIEnv& env) {
@@ -1269,7 +1311,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchTiles, "nativeGetPrefetchTiles"),
         METHOD(&NativeMapView::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
-        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
+        METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
+        METHOD(&NativeMapView::request, "nativeRequest"));
         METHOD(&NativeMapView::getCameraProjectMatrix, "nativeGetCameraProjectMatrix");
 }
 

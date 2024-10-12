@@ -9,6 +9,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.Keep;
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -990,6 +991,10 @@ final class NativeMapView implements NativeMap {
     fileSource.setApiBaseUrl(baseUrl);
   }
 
+  public void requestTile(String urlTemplate, TileId tileId, FileSource.ResponseCallback callback) {
+    nativeRequest(urlTemplate, tileId, callback);
+  }
+
   @Override
   public Light getLight() {
     if (checkState("getLight")) {
@@ -1490,6 +1495,8 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeTriggerRepaint();
+  @Keep
+  public native void nativeRequest(String urlTemplate, TileId tile, FileSource.ResponseCallback callback);
 
   //
   // Snapshot
