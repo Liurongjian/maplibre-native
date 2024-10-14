@@ -45,7 +45,7 @@ public class OfflineActivity extends AppCompatActivity
   public static final String JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME";
 
   // Style URL
-  public static final String STYLE_URL = Style.MAPBOX_STREETS;
+  public static final String STYLE_URL = "https://api.maptiler.com/maps/outdoor-v2/style.json?key=cikR6pn5PCrTe2nF2XPm";
 
   /*
    * UI elements
@@ -84,12 +84,7 @@ public class OfflineActivity extends AppCompatActivity
       mapboxMap.setStyle(new Style.Builder().fromUri(STYLE_URL));
       // Set initial position to UNHQ in NYC
       mapboxMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-        new CameraPosition.Builder()
-          .target(new LatLng(40.749851, -73.967966))
-          .zoom(14)
-          .bearing(0)
-          .tilt(0)
-          .build()));
+        new CameraPosition.Builder().target(new LatLng( 22.557342, 113.864951)).zoom(14).build()));
     });
 
     // The progress bar

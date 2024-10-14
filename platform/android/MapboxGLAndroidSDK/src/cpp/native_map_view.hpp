@@ -45,12 +45,6 @@ public:
 
     static constexpr auto Name() { return "com/mapbox/mapboxsdk/maps/NativeMapView"; };
 
-    struct ResponseCallback {
-        static constexpr auto Name()  { return "com/mapbox/mapboxsdk/storage/FileSource$ResponseCallback";}
-        static void onResult(jni::JNIEnv&, const jni::Object<NativeMapView::ResponseCallback>&,
-                             const jni::jint, const jni::Local<jni::Array<jni::jbyte>> &);
-    };
-
     static void registerNative(jni::JNIEnv&);
 
     NativeMapView(jni::JNIEnv&,
@@ -265,9 +259,15 @@ public:
 
     void triggerRepaint(JNIEnv&);
 
-    void request(jni::JNIEnv&, const jni::String & tempURL, const jni::Object<TileId>&, const jni::Object<NativeMapView::ResponseCallback> &);
+    void request(jni::JNIEnv&, const jni::String & tempURL, const jni::Object<TileId>&);
 
 private:
+
+    struct ReqTile {
+        int x, y, z;
+        int type;
+    };
+    void callJavaRevTileData(jni::JNIEnv&, const ReqTile & , const Response &);
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM *vm = nullptr;
@@ -285,6 +285,7 @@ private:
 
     // Ensure these are initialised last
     std::unique_ptr<mbgl::Map> map;
+    std::map<std::string, std::unique_ptr<AsyncRequest>> reqTileTasks;
 };
 
 } // namespace android

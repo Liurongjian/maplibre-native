@@ -19,12 +19,21 @@ public class TileId {
         this.wrap = wrap;
         this.isLoaded = isLoaded;
     }
-    public final int overscaledZ;
-    public final int wrap;
+
+    public TileId(int x, int y, int z, int type) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.type = type;
+    }
+
     public final int x;
     public final int y;
     public final int z;
+    public int overscaledZ;
+    public int wrap;
     public boolean isLoaded;
+    public int type;
 
     @Override
     public int hashCode() {
@@ -46,7 +55,7 @@ public class TileId {
     @NonNull
     @Override
     public String toString() {
-        return String.format("{%d, %d, %d, %b}", x, y, z, isLoaded);
+        return String.format("{%d, %d, %d, %d, %b}", x, y, z, type, isLoaded);
     }
 
     public LatLngBounds getBounds() {

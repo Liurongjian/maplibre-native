@@ -167,6 +167,8 @@ interface NativeMap {
 
   void removeImage(String name);
 
+  void setTileDataCallback(MapboxMap.TileDataCallback callback);
+
   Light getLight();
 
   //
@@ -291,5 +293,5 @@ interface NativeMap {
 
   void addSnapshotCallback(@NonNull MapboxMap.SnapshotReadyCallback callback);
 
-  void requestTile(String urlTemplate, TileId tileId, FileSource.ResponseCallback callback);
+  void requestTile(String urlTemplate, TileId tileId);
 }

@@ -80,11 +80,6 @@ public class FileSource {
 
   }
 
-  @Keep
-  public interface ResponseCallback {
-    void onResult(int code, byte[] data);
-  }
-
   // File source instance is kept alive after initialization
   private static FileSource INSTANCE;
 

@@ -867,8 +867,12 @@ public final class MapboxMap {
     }
   }
 
-  public void requestTile(String urlTemplete, TileId tileId, FileSource.ResponseCallback callback) {
-      nativeMapView.requestTile(urlTemplete, tileId, callback);
+  public void requestTile(String urlTemplete, TileId tileId) {
+      nativeMapView.requestTile(urlTemplete, tileId);
+  }
+
+  public void setTileDataCallback(TileDataCallback callback) {
+    nativeMapView.setTileDataCallback(callback);
   }
 
   //
@@ -2503,5 +2507,8 @@ public final class MapboxMap {
     for (OnDeveloperAnimationListener listener : developerAnimationStartedListeners) {
       listener.onDeveloperAnimationStarted();
     }
+  }
+  public interface TileDataCallback {
+    void onTileData(TileId tileId, int code, byte[] data);
   }
 }

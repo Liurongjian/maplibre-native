@@ -29,29 +29,23 @@ public:
           maptilerFileSource(std::move(maptilerFileSource_)) {}
 
     void request(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
-        bool test = resource.kind == Resource::Tile && resource.loadingMethod == Resource::LoadingMethod::All;
-        if(test) Log::Debug(mbgl::Event::JNI, "request tile! main res %s", resource.url.c_str());
 
         auto callback = [ref](const Response& res) { ref.invoke(&FileSourceRequest::setResponse, res); };
 
         auto requestFromNetwork = [=](const Resource& res,
                                       std::unique_ptr<AsyncRequest> parent) -> std::unique_ptr<AsyncRequest> {
-            if(test) Log::Debug(mbgl::Event::JNI, "request tile! main res network 1");
             if (!onlineFileSource || !onlineFileSource->canRequest(resource)) {
                 return parent;
             }
 
-            if(test) Log::Debug(mbgl::Event::JNI, "request tile! main res network 2");
             // Keep parent request alive while chained request is being processed.
             std::shared_ptr<AsyncRequest> parentKeepAlive = std::move(parent);
 
             MBGL_TIMING_START(watch);
-            if(test) Log::Debug(mbgl::Event::JNI, "request tile! main res network 3");
             return onlineFileSource->request(res, [=, ptr = parentKeepAlive](const Response& response) {
                 if (databaseFileSource) {
                     databaseFileSource->forward(res, response, nullptr);
                 }
-                if(test) Log::Debug(mbgl::Event::JNI, "request tile! main response from network");
                 if (res.kind == Resource::Kind::Tile) {
                     // onlineResponse.data will be null if data not modified
                     MBGL_TIMING_FINISH(watch,
@@ -85,19 +79,17 @@ public:
                 tasks[req] = databaseFileSource->request(resource, callback);
             } else {
                 // Cache request with fallback to network with cache control
-                if(test) Log::Debug(mbgl::Event::JNI, "request tile! main res %s", "6");
                 tasks[req] = databaseFileSource->request(resource, [=](const Response& response) {
                     Resource res = resource;
 
-                    bool isInCache = !response.noContent;
-                    if(test) Log::Debug(mbgl::Event::JNI, "request tile! main inCache %d", isInCache);
+                    bool isCallBack = false;
                     // Resource is in the cache
                     if (!response.noContent) {
                         if (response.isUsable()) {
-                            if(test) Log::Debug(mbgl::Event::JNI, "request tile! main res callback");
                             callback(response);
                             // Set the priority of existing resource to low if it's expired but usable.
                             res.setPriority(Resource::Priority::Low);
+                            isCallBack = true;
                         } else {
                             // Set prior data only if it was not returned to the requester.
                             // Once we get 304 response from the network, we will forward response
@@ -110,8 +102,11 @@ public:
                         res.priorExpires = response.expires;
                         res.priorEtag = response.etag;
                     }
-                    if(test) Log::Debug(mbgl::Event::JNI, "request tile! main req network");
-                    tasks[req] = requestFromNetwork(res, std::move(tasks[req]));
+                    //查看是否有回调，如果是CacheOrNet且已回调过，则不用请求网络
+                    bool needNetReq = !isCallBack || resource.loadingMethod != Resource::LoadingMethod::CacheOrNet;
+                    if(needNetReq) {
+                        tasks[req] = requestFromNetwork(res, std::move(tasks[req]));
+                    }
                 });
             }
         } else if (auto networkReq = requestFromNetwork(resource, nullptr)) {
@@ -166,9 +161,6 @@ public:
               maptilerFileSource)) {}
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
-        bool test = resource.kind == Resource::Tile && resource.loadingMethod == Resource::LoadingMethod::All;
-        if(test) Log::Debug(mbgl::Event::JNI, "request tile! main1 url %s", resource.url.c_str());
-
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
         req->onCancel([actorRef = thread->actor(), req = req.get()]() {
             actorRef.invoke(&MainResourceLoaderThread::cancel, req);

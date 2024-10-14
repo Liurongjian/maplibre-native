@@ -9,7 +9,6 @@ import android.text.TextUtils;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.Keep;
-import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -81,6 +80,8 @@ final class NativeMapView implements NativeMap {
 
   // Listener invoked to return a bitmap of the map
   private MapboxMap.SnapshotReadyCallback snapshotReadyCallback;
+
+  private MapboxMap.TileDataCallback tileDataCallback;
 
   static {
     LibraryLoader.load();
@@ -991,8 +992,20 @@ final class NativeMapView implements NativeMap {
     fileSource.setApiBaseUrl(baseUrl);
   }
 
-  public void requestTile(String urlTemplate, TileId tileId, FileSource.ResponseCallback callback) {
-    nativeRequest(urlTemplate, tileId, callback);
+  public void requestTile(String urlTemplate, TileId tileId) {
+    nativeRequest(urlTemplate, tileId);
+  }
+
+  @Keep
+  public void onRevTileData(TileId tileId, int code, byte[] data) {
+    if(tileDataCallback != null) {
+      tileDataCallback.onTileData(tileId, code, data);
+    }
+  }
+
+  @Override
+  public void setTileDataCallback(MapboxMap.TileDataCallback callback) {
+    tileDataCallback = callback;
   }
 
   @Override
@@ -1496,7 +1509,7 @@ final class NativeMapView implements NativeMap {
   @Keep
   private native void nativeTriggerRepaint();
   @Keep
-  public native void nativeRequest(String urlTemplate, TileId tile, FileSource.ResponseCallback callback);
+  public native void nativeRequest(String urlTemplate, TileId tile);
 
   //
   // Snapshot

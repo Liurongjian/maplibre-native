@@ -21,8 +21,6 @@ public:
         : db(std::make_unique<OfflineDatabase>(cachePath)), onlineFileSource(std::move(onlineFileSource_)) {}
 
     void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
-        bool test = resource.kind == Resource::Tile && resource.loadingMethod == Resource::LoadingMethod::All;
-        if(test) Log::Debug(mbgl::Event::JNI, "request tile! db res %s", resource.url.c_str());
 
         optional<Response> offlineResponse =
             (resource.storagePolicy != Resource::StoragePolicy::Volatile) ? db->get(resource) : nullopt;
@@ -35,7 +33,6 @@ public:
             offlineResponse->error =
                 std::make_unique<Response::Error>(Response::Error::Reason::NotFound, "Cached resource is unusable");
         }
-        if(test) Log::Debug(mbgl::Event::JNI, "request tile! db set response !offlineRes %d, !isUsable %d", !offlineResponse, !offlineResponse->isUsable());
         req.invoke(&FileSourceRequest::setResponse, *offlineResponse);
     }
 

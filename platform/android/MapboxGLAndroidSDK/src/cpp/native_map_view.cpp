@@ -1162,46 +1162,52 @@ void NativeMapView::triggerRepaint(JNIEnv&) {
     map->triggerRepaint();
 }
 
-        void NativeMapView::request(jni::JNIEnv &env, const jni::String &tempURL, const jni::Object<TileId> &tileId,
-                                    const jni::Object<NativeMapView::ResponseCallback> &callback) {
+        void NativeMapView::request(jni::JNIEnv &env, const jni::String &tempURL, const jni::Object<TileId> &tileId) {
             auto resourceLoader = map->getFileSource();
+            ReqTile reqTile = ReqTile{TileId::getX(env, tileId), TileId::getY(env, tileId), TileId::getZ(env, tileId), TileId::getType(env, tileId)};
             if (!resourceLoader) {
                 auto data = jni::Array<jni::jbyte>::New(env, 0);
-                NativeMapView::ResponseCallback::onResult(env, callback, -1, data);
+                auto res = Response();
+                res.noContent = true;
+                res.error = std::make_unique<Response::Error>(Response::Error::Reason::Server, "resource loader is nullptr");
+                callJavaRevTileData(env, reqTile, res);
                 return;
             }
             std::string urlTemplate = jni::Make<std::string>(env, tempURL);
-            int x = TileId::getX(env, tileId);
-            int y = TileId::getY(env, tileId);
-            int z = TileId::getZ(env, tileId);
-            Resource resource = Resource::tile(
-                    urlTemplate, 1,
-                    x, y, z, Tileset::Scheme::XYZ,
-                    Resource::LoadingMethod::All);
-            bool test = resource.url.find("vtu=22", 0) > 0;
-            if (test) Log::Debug(mbgl::Event::JNI, "request tile! url = %s", resource.url.c_str());
-            auto req = mapRenderer.actor().ask(&Renderer::reqTileData, resourceLoader, resource, [&](const Response &res) {
-                Log::Debug(mbgl::Event::JNI, "request tile! 1");
-                if (!res.error) {
-                    Log::Debug(mbgl::Event::JNI, "request tile! 2");
-                    long size = res.data->size();
-                    auto data = jni::Array<jni::jbyte>::New(env, size);
-                    jni::SetArrayRegion(env, *data, 0, size, reinterpret_cast<const signed char *>(res.data->data()));
-                    NativeMapView::ResponseCallback::onResult(env, callback, 0, data);
-                } else {
-                    Log::Debug(mbgl::Event::JNI, "request tile! 3");
-                    auto data = jni::Array<jni::jbyte>::New(env, 0);
-                    NativeMapView::ResponseCallback::onResult(env, callback, -2, data);
-                }
+            Resource resource = Resource::tile(urlTemplate, 1, reqTile.x, reqTile.y, reqTile.z, Tileset::Scheme::XYZ, Resource::LoadingMethod::CacheOrNet);
+            if(reqTileTasks.find(resource.url) != reqTileTasks.end()) {
+                //不需要新加请求，已经在请求列表中
+                return ;
+            }
+            reqTileTasks[resource.url] = mapRenderer.actor().ask(&Renderer::reqTileData, resourceLoader, resource, [=](const Response &res) {
+                auto env = android::AttachEnv();
+                auto key = resource.url;
+                callJavaRevTileData(*env, reqTile, res);
+                //去除请求引用
+                reqTileTasks.erase(key);
             }).get();
         }
 
-        void NativeMapView::ResponseCallback::onResult(jni::JNIEnv &env, const jni::Object<NativeMapView::ResponseCallback> &callback,
-                                                       const jni::jint code, const jni::Local<jni::Array<jni::jbyte>> &data) {
-            static auto &javaClass = jni::Class<NativeMapView::ResponseCallback>::Singleton(env);
-            static auto method = javaClass.GetMethod<void(jni::jint, jni::Array<jni::jbyte>)>(env, "onResult");
-            callback.Call(env, method, code, data);
-        }
+void NativeMapView::callJavaRevTileData(jni::JNIEnv& env, const ReqTile & reqTile, const Response & response) {
+    int code = response.error != nullptr ? (int)response.error->reason : 0;
+    jni::Local<jni::Array<jni::jbyte>> data;
+    jni::Local<jni::Object<TileId>> tileId = TileId::New(env, reqTile.x, reqTile.y, reqTile.z, reqTile.type);
+    if (!response.error && !response.noContent && response.data) {
+        long size = response.data->size();
+        data = jni::Array<jni::jbyte>::New(env, size);
+        jni::SetArrayRegion(env, *data, 0, size, reinterpret_cast<const signed char *>(response.data->data()));
+    } else {
+        data = jni::Array<jni::jbyte>::New(env, 0);
+        code = code == 0 ? -1 : code;
+    }
+
+    static auto& javaClass = jni::Class<NativeMapView>::Singleton(env);
+    static auto onRevTileData = javaClass.GetMethod<void (jni::Object<TileId>, jni::jint, jni::Array<jni::jbyte>)>(env, "onRevTileData");
+    auto weakReference = javaPeer.get(env);
+    if (weakReference) {
+        weakReference.Call(env, onRevTileData, tileId, code, data);
+    }
+}
 
 // Static methods //
 

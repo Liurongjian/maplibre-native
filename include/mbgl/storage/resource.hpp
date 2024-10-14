@@ -47,10 +47,12 @@ public:
         None        = 0b00,
         Cache       = 0b01,
         Network     = 0b10,
+        Once        = 0b100,
 
         CacheOnly   = Cache,
         NetworkOnly = Network,
         All         = Cache | Network,
+        CacheOrNet = Once | Cache | Network,
     };
 
     Resource(Kind kind_,
