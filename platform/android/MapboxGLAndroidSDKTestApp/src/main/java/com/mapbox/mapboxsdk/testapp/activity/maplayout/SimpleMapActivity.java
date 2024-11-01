@@ -2,7 +2,6 @@ package com.mapbox.mapboxsdk.testapp.activity.maplayout;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -12,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.log.Logger;
-import com.mapbox.mapboxsdk.maps.Image;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.Style;

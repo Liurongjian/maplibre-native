@@ -32,11 +32,9 @@ public class RasterDemTile {
         return mId;
     }
 
-    public void loadDemData(RasterDemSource source) {
-        if(mId.isLoaded && source != null) {
-            mData = source.queryTileBitmap(mId);
-            isLoadData = true;
-        }
+    public void setDemData(Bitmap bp) {
+        mData = bp;
+        isLoadData = true;
     }
 
     public void clearDemData() {

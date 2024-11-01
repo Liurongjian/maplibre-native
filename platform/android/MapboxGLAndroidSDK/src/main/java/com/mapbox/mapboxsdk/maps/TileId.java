@@ -24,6 +24,7 @@ public class TileId {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.overscaledZ = z;
         this.type = type;
     }
 
@@ -37,19 +38,19 @@ public class TileId {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, z, overscaledZ, wrap);
+        return Objects.hash(x, y, z, overscaledZ, wrap, type);
     }
 
     @Override
     public boolean equals(Object o) {
-        if(this == o) {
+        if (this == o) {
             return true;
         }
-        if(o == null || !(o instanceof TileId)) {
+        if (o == null || !(o instanceof TileId)) {
             return false;
         }
         TileId that = (TileId) o;
-        return x == that.x && y == that.y && z == that.z && overscaledZ == that.overscaledZ && wrap == that.wrap;
+        return x == that.x && y == that.y && z == that.z && overscaledZ == that.overscaledZ && wrap == that.wrap && type == that.type;
     }
 
     @NonNull
