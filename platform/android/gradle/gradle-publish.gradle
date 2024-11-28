@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 //apply plugin: 'signing'
-apply from: "${rootDir}/gradle/artifact-settings.gradle"
-apply from: "${rootDir}/gradle/publish-root.gradle"
+apply from: "../gradle/artifact-settings.gradle"
+apply from: "../gradle/publish-root.gradle"
 
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.sourceFiles
@@ -76,18 +76,14 @@ afterEvaluate {
         }
         repositories {
             maven {
-                name = "LocalTest2"
+                name = "deployer"
                 // change to point to your repo, e.g. http://my.org/repo
-                url = "file://tmp/000/.m2"
+                url = "$DJI_MAVEN_URL"
+                credentials(PasswordCredentials) {
+                    username maven_username
+                    password maven_password
+                }
             }
-
-            maven {
-                name = "LocalMavenTest"
-                // change to point to your repo, e.g. http://my.org/repo
-                url = "file://tmp/000/.m2"
-            }
-
-
         }
     }
 }

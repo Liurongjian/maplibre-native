@@ -126,6 +126,6 @@ apply from: "../gradle/gradle-checkstyle.gradle"
 apply from: "../gradle/gradle-dependencies-graph.gradle"
 apply from: "../gradle/gradle-update-vendor-modules.gradle"
 apply from: "../gradle/android-nitpick.gradle"
-//apply from: "../gradle/gradle-publish.gradle"
+apply from: "../gradle/gradle-publish.gradle"
 // Disabled to prevent timeouts
 // apply from: "${rootDir}/gradle/jacoco-report.gradle"
