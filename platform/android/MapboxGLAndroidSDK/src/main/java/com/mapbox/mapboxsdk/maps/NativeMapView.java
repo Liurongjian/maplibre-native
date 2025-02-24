@@ -997,9 +997,9 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  public void onRevTileData(TileId tileId, int code, byte[] data) {
+  public void onRevTileData(TileId tileId, int code, byte[] data, boolean isCache) {
     if(tileDataCallback != null) {
-      tileDataCallback.onTileData(tileId, code, data);
+      tileDataCallback.onTileData(tileId, code, data, isCache);
     }
   }
 

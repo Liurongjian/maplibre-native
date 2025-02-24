@@ -1190,6 +1190,7 @@ void NativeMapView::triggerRepaint(JNIEnv&) {
 
 void NativeMapView::callJavaRevTileData(jni::JNIEnv& env, const ReqTile & reqTile, const Response & response) {
     int code = response.error != nullptr ? (int)response.error->reason : 0;
+    int isCache = response.isCache;
     jni::Local<jni::Array<jni::jbyte>> data;
     jni::Local<jni::Object<TileId>> tileId = TileId::New(env, reqTile.x, reqTile.y, reqTile.z, reqTile.type);
     if (!response.error && !response.noContent && response.data) {
@@ -1202,10 +1203,10 @@ void NativeMapView::callJavaRevTileData(jni::JNIEnv& env, const ReqTile & reqTil
     }
 
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(env);
-    static auto onRevTileData = javaClass.GetMethod<void (jni::Object<TileId>, jni::jint, jni::Array<jni::jbyte>)>(env, "onRevTileData");
+    static auto onRevTileData = javaClass.GetMethod<void (jni::Object<TileId>, jni::jint, jni::Array<jni::jbyte>, jni::jboolean)>(env, "onRevTileData");
     auto weakReference = javaPeer.get(env);
     if (weakReference) {
-        weakReference.Call(env, onRevTileData, tileId, code, data);
+        weakReference.Call(env, onRevTileData, tileId, code, data, isCache);
     }
 }
 

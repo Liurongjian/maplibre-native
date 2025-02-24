@@ -15,6 +15,7 @@ Response& Response::operator=(const Response& res) {
     modified = res.modified;
     expires = res.expires;
     etag = res.etag;
+    isCache = res.isCache;
     return *this;
 }
 

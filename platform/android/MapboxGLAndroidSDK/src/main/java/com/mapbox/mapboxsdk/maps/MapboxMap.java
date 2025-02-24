@@ -2509,6 +2509,6 @@ public final class MapboxMap {
     }
   }
   public interface TileDataCallback {
-    void onTileData(TileId tileId, int code, byte[] data);
+    void onTileData(TileId tileId, int code, byte[] data, boolean isCache);
   }
 }

@@ -36,6 +36,7 @@ public:
     optional<Timestamp> modified;
     optional<Timestamp> expires;
     optional<std::string> etag;
+    bool isCache = false;
 
     bool isFresh() const {
         return expires ? *expires > util::now() : !error;

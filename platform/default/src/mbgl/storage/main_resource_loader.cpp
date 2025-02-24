@@ -86,7 +86,9 @@ public:
                     // Resource is in the cache
                     if (!response.noContent) {
                         if (response.isUsable()) {
-                            callback(response);
+                            Response result(response);
+                            result.isCache = true;
+                            callback(result);
                             // Set the priority of existing resource to low if it's expired but usable.
                             res.setPriority(Resource::Priority::Low);
                             isCallBack = true;
